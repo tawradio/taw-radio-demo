@@ -3,299 +3,615 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>STUMUSIC Player — Música Ambiental para Negocios</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<title>SONOplayer — stumusicpro.cl</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --bg:#070910;
+  --bg:#07090E;
+  --surface:#0D1018;
+  --surface2:#111520;
   --gold:#C8A84B;
   --gold2:#E8C96A;
   --gold3:#F5E0A0;
-  --white:#F0EDE6;
-  --white2:#C8C4BC;
-  --gray:#6A6858;
-  --border:rgba(200,168,75,.2);
-  --border2:rgba(200,168,75,.45);
-  --jazz:#B8A0FF;
-  --ambient:#4DFFD4;
-  --technos:#FF8C5A;
-  --reggaeton:#FF5FA0;
-  --latino:#FFD040;
-  --multi:#60C8FF;
+  --mint:#4DFFD4;
+  --white:#F2EFE8;
+  --muted:#8A8778;
+  --dim:#3A3830;
+  --morning:#FFD040;
+  --lunch:#FF8040;
+  --night:#A080FF;
+  --ethnic:#00E5B0;
+  --drive:#FF4090;
+  --glow-morning:rgba(255,208,64,.18);
+  --glow-lunch:rgba(255,128,64,.18);
+  --glow-night:rgba(160,128,255,.18);
+  --glow-ethnic:rgba(0,229,176,.15);
+  --glow-drive:rgba(255,64,144,.15);
 }
-html,body{min-height:100%;background:var(--bg);color:var(--white);font-family:'DM Sans',sans-serif;overflow-x:hidden;}
-body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");pointer-events:none;z-index:999;}
-body::before{content:'';position:fixed;top:-30%;left:50%;transform:translateX(-50%);width:90vw;height:70vw;background:radial-gradient(ellipse,rgba(200,168,75,.07) 0%,transparent 65%);pointer-events:none;}
-.app{position:relative;z-index:1;min-height:100vh;max-width:500px;margin:0 auto;padding:0 1.25rem 2.5rem;display:flex;flex-direction:column;}
-.header{padding:2.2rem 0 1.8rem;text-align:center;position:relative;}
-.header-deco{display:flex;align-items:center;justify-content:center;gap:.75rem;margin-bottom:.6rem;}
+
+html,body{
+  min-height:100%;
+  background:var(--bg);
+  color:var(--white);
+  font-family:'Inter',sans-serif;
+  overflow-x:hidden;
+}
+
+/* ambient bg glow */
+body::before{
+  content:'';
+  position:fixed;
+  top:-10%;left:50%;
+  transform:translateX(-50%);
+  width:120vw;height:50vh;
+  background:radial-gradient(ellipse at center,rgba(200,168,75,.04) 0%,transparent 60%);
+  pointer-events:none;
+}
+
+.app{
+  position:relative;z-index:1;
+  max-width:480px;
+  margin:0 auto;
+  min-height:100vh;
+  padding:1.2rem .9rem .5rem;
+  display:flex;
+  flex-direction:column;
+  gap:.75rem;
+}
+
+/* ══ HEADER ══ */
+.header{text-align:center;padding-bottom:.9rem;position:relative;}
+.header::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 0%,rgba(200,168,75,.5) 30%,rgba(200,168,75,.8) 50%,rgba(200,168,75,.5) 70%,transparent 100%);
+}
+
+.brand-row{display:flex;align-items:center;justify-content:center;gap:.7rem;margin-bottom:.25rem;}
+
+.clef{
+  font-family:'Cormorant Garamond',serif;
+  font-size:3rem;
+  color:var(--gold);
+  line-height:.9;
+  margin-top:-.05em;
+  text-shadow:0 0 30px rgba(200,168,75,.6),0 0 60px rgba(200,168,75,.2);
+  animation:clef-glow 3s ease-in-out infinite;
+}
 @keyframes clef-glow{
-  0%,100%{text-shadow:0 0 20px rgba(200,168,75,.4),0 0 40px rgba(200,168,75,.15);}
-  50%{text-shadow:0 0 35px rgba(200,168,75,.7),0 0 70px rgba(200,168,75,.3);}
+  0%,100%{text-shadow:0 0 20px rgba(200,168,75,.4);}
+  50%{text-shadow:0 0 40px rgba(200,168,75,.8),0 0 80px rgba(200,168,75,.3);}
 }
-.deco-line{flex:1;height:2px;max-width:90px;position:relative;overflow:visible;}
-.deco-line.left-line{background:linear-gradient(90deg,transparent 0%,var(--gold) 60%,var(--gold2) 100%);border-radius:0 2px 2px 0;box-shadow:0 0 8px rgba(200,168,75,.3);}
-.deco-line.left-line::after{content:'';position:absolute;right:-1px;top:50%;width:6px;height:6px;border-right:2px solid var(--gold2);border-top:2px solid var(--gold2);transform:translateY(-50%) rotate(45deg);}
-.deco-line.right-line{background:linear-gradient(90deg,var(--gold2) 0%,var(--gold) 40%,transparent 100%);border-radius:2px 0 0 2px;box-shadow:0 0 8px rgba(200,168,75,.3);}
-.deco-line.right-line::before{content:'';position:absolute;left:-1px;top:50%;width:6px;height:6px;border-left:2px solid var(--gold2);border-bottom:2px solid var(--gold2);transform:translateY(-50%) rotate(45deg);}
-.logo-wrap{margin-bottom:.5rem;display:flex;align-items:center;justify-content:center;gap:.5rem;}
-.logo-clef{font-size:clamp(3rem,11vw,4.5rem);color:var(--gold);line-height:1;text-shadow:0 0 30px rgba(200,168,75,.5),0 0 60px rgba(200,168,75,.2);animation:clef-glow 3s ease-in-out infinite;font-family:'Cormorant Garamond',serif;margin-top:-.1em;align-self:flex-end;margin-bottom:-.1em;}
-.logo-text-wrap{display:flex;flex-direction:column;align-items:flex-start;}
-.logo{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,8.5vw,3rem);line-height:1;letter-spacing:.22em;display:flex;align-items:baseline;}
-.logo-stu{font-weight:700;color:var(--gold);letter-spacing:.22em;text-shadow:0 0 25px rgba(200,168,75,.2);}
-.logo-music{font-weight:700;color:var(--gold);letter-spacing:.22em;text-shadow:0 0 25px rgba(200,168,75,.2);}
-.logo-player{font-family:'Cormorant Garamond',serif;font-size:clamp(.75rem,2.8vw,1rem);font-weight:300;font-style:italic;letter-spacing:.35em;color:var(--white2);display:block;margin-top:.15rem;padding-left:.1em;opacity:.8;}
-.header::after{content:'';position:absolute;bottom:0;left:5%;right:5%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
-.tagline{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gray);margin-top:.3rem;}
-.now-playing{margin:1.5rem 0 1.25rem;background:rgba(200,168,75,.04);border:1px solid var(--border);border-radius:18px;padding:.9rem 1.1rem;display:flex;align-items:center;gap:1rem;transition:border-color .4s,box-shadow .4s;position:relative;overflow:hidden;}
-.now-playing::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(200,168,75,.4),transparent);}
-.now-playing.live{border-color:var(--border2);box-shadow:0 4px 30px rgba(200,168,75,.08);}
-.play-btn{width:52px;height:52px;border-radius:50%;border:1.5px solid var(--gold);background:rgba(200,168,75,.08);color:var(--gold);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .25s;}
-.play-btn:hover{background:rgba(200,168,75,.18);transform:scale(1.06);}
-.play-btn:active{transform:scale(.93);}
-.play-btn svg{width:20px;height:20px;fill:currentColor;}
-.np-info{flex:1;min-width:0;}
-.np-label{font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gray);margin-bottom:4px;}
-.np-track{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.np-genre{font-size:.65rem;color:var(--gray);margin-top:3px;}
-.vis{display:flex;align-items:center;gap:3px;height:30px;flex-shrink:0;}
-.vis-bar{width:3px;background:var(--gold);border-radius:2px;opacity:.2;height:4px;}
-.vis.active .vis-bar{opacity:.75;animation:vbar 1s ease-in-out infinite;}
-.vis.active .vis-bar:nth-child(1){animation-delay:0s;animation-duration:.9s;}
-.vis.active .vis-bar:nth-child(2){animation-delay:.15s;animation-duration:1.1s;}
-.vis.active .vis-bar:nth-child(3){animation-delay:.05s;animation-duration:.8s;}
-.vis.active .vis-bar:nth-child(4){animation-delay:.2s;animation-duration:1.2s;}
-.vis.active .vis-bar:nth-child(5){animation-delay:.1s;animation-duration:.95s;}
-@keyframes vbar{0%,100%{height:4px;}50%{height:24px;}}
-.section-label{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;}
-.section-label span{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gray);white-space:nowrap;}
-.section-label::before,.section-label::after{content:'';flex:1;height:1px;background:rgba(200,168,75,.15);}
-.canales{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.25rem;}
-.canal{position:relative;border-radius:16px;padding:1.3rem 1.1rem 1.1rem;cursor:pointer;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.025);transition:all .3s cubic-bezier(.4,0,.2,1);overflow:hidden;-webkit-tap-highlight-color:transparent;user-select:none;}
-.canal::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;opacity:0;transition:opacity .3s;}
-.canal.jazz::before{background:linear-gradient(90deg,transparent,var(--jazz),transparent);}
-.canal.ambient::before{background:linear-gradient(90deg,transparent,var(--ambient),transparent);}
-.canal.technos::before{background:linear-gradient(90deg,transparent,var(--technos),transparent);}
-.canal.reggaeton::before{background:linear-gradient(90deg,transparent,var(--reggaeton),transparent);}
-.canal.latino::before{background:linear-gradient(90deg,transparent,var(--latino),transparent);}
-.canal.multi::before{background:linear-gradient(90deg,transparent,var(--multi),transparent);}
-.canal::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;border-radius:inherit;}
-.canal.jazz::after{background:radial-gradient(ellipse at 10% 10%,rgba(184,160,255,.14),transparent 60%);}
-.canal.ambient::after{background:radial-gradient(ellipse at 10% 10%,rgba(77,255,212,.12),transparent 60%);}
-.canal.technos::after{background:radial-gradient(ellipse at 10% 10%,rgba(255,140,90,.14),transparent 60%);}
-.canal.reggaeton::after{background:radial-gradient(ellipse at 10% 10%,rgba(255,95,160,.14),transparent 60%);}
-.canal.latino::after{background:radial-gradient(ellipse at 10% 10%,rgba(255,208,64,.12),transparent 60%);}
-.canal.multi::after{background:radial-gradient(ellipse at 10% 10%,rgba(96,200,255,.12),transparent 60%);}
-.canal:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.14);}
-.canal:hover::before,.canal:hover::after{opacity:1;}
-.canal.active{transform:translateY(-4px);}
-.canal.active::before,.canal.active::after{opacity:1;}
-.canal.jazz.active{border-color:rgba(184,160,255,.5);box-shadow:0 10px 35px rgba(184,160,255,.18);}
-.canal.ambient.active{border-color:rgba(77,255,212,.5);box-shadow:0 10px 35px rgba(77,255,212,.15);}
-.canal.technos.active{border-color:rgba(255,140,90,.5);box-shadow:0 10px 35px rgba(255,140,90,.15);}
-.canal.reggaeton.active{border-color:rgba(255,95,160,.5);box-shadow:0 10px 35px rgba(255,95,160,.15);}
-.canal.latino.active{border-color:rgba(255,208,64,.5);box-shadow:0 10px 35px rgba(255,208,64,.15);}
-.canal.multi.active{border-color:rgba(96,200,255,.5);box-shadow:0 10px 35px rgba(96,200,255,.12);}
-.canal.locked{cursor:not-allowed;opacity:.55;}
-.canal.locked:hover{transform:none;border-color:rgba(255,255,255,.07);}
-.canal.locked:hover::before,.canal.locked:hover::after{opacity:0;}
-.canal-dot{position:absolute;top:12px;right:12px;width:7px;height:7px;border-radius:50%;opacity:0;transition:opacity .3s;}
-.canal.jazz .canal-dot{background:var(--jazz);}
-.canal.ambient .canal-dot{background:var(--ambient);}
-.canal.technos .canal-dot{background:var(--technos);}
-.canal.reggaeton .canal-dot{background:var(--reggaeton);}
-.canal.latino .canal-dot{background:var(--latino);}
-.canal.multi .canal-dot{background:var(--multi);}
-.canal.active .canal-dot{opacity:1;animation:pdot 2s ease-in-out infinite;}
-@keyframes pdot{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.6);opacity:.4;}}
-.canal-lock{position:absolute;top:11px;right:11px;font-size:13px;opacity:.45;}
-.canal-soon{position:absolute;bottom:9px;right:10px;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gray);}
-.canal-icon{font-size:2.4rem;margin-bottom:.65rem;display:block;line-height:1;filter:saturate(.6) brightness(.9);transition:filter .3s,transform .3s;position:relative;z-index:1;}
-.canal.active .canal-icon{filter:saturate(1.3) brightness(1.1);transform:scale(1.15);}
-.canal:hover:not(.locked) .canal-icon{filter:saturate(1.1) brightness(1.05);transform:scale(1.08);}
-.canal-name{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--white);margin-bottom:.2rem;line-height:1.1;position:relative;z-index:1;}
-.canal-desc{font-size:.62rem;color:var(--gray);line-height:1.55;margin-bottom:.65rem;position:relative;z-index:1;}
-.canal-badge{display:inline-flex;align-items:center;gap:4px;font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;font-weight:500;padding:3px 9px;border-radius:20px;position:relative;z-index:1;border:1px solid;}
-.canal.jazz .canal-badge{background:rgba(184,160,255,.12);color:var(--jazz);border-color:rgba(184,160,255,.25);}
-.canal.ambient .canal-badge{background:rgba(77,255,212,.1);color:var(--ambient);border-color:rgba(77,255,212,.22);}
-.canal.technos .canal-badge{background:rgba(255,140,90,.1);color:var(--technos);border-color:rgba(255,140,90,.22);}
-.canal.reggaeton .canal-badge{background:rgba(255,95,160,.1);color:var(--reggaeton);border-color:rgba(255,95,160,.22);}
-.canal.latino .canal-badge{background:rgba(255,208,64,.1);color:var(--latino);border-color:rgba(255,208,64,.22);}
-.canal.multi .canal-badge{background:rgba(96,200,255,.1);color:var(--multi);border-color:rgba(96,200,255,.22);}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1.5rem;}
-.stat{background:rgba(255,255,255,.03);border:1px solid rgba(200,168,75,.1);border-radius:12px;padding:.75rem .5rem;text-align:center;}
-.stat-val{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--gold);}
-.stat-label{font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--gray);margin-top:2px;}
-.footer{text-align:center;padding-top:1.25rem;position:relative;}
-.footer::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,rgba(200,168,75,.3),transparent);}
-.footer-brand{font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--gold);margin-bottom:.3rem;}
-.footer-sub{font-size:.58rem;color:var(--gray);letter-spacing:.1em;}
-.loader{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;z-index:1000;transition:opacity .7s,visibility .7s;}
+
+.brand-text{display:flex;flex-direction:column;align-items:flex-start;gap:.05rem;}
+
+.brand-name{
+  font-family:'Orbitron',monospace;
+  font-size:clamp(1.6rem,6.5vw,2.2rem);
+  font-weight:800;
+  letter-spacing:.14em;
+  line-height:1;
+  color:var(--gold2);
+  text-shadow:
+    0 1px 0 #A07828,
+    0 2px 0 #8A6620,
+    0 3px 0 #744E10,
+    0 4px 0 #5E3A00,
+    0 5px 8px rgba(0,0,0,.6),
+    0 0 20px rgba(200,168,75,.25),
+    0 0 40px rgba(200,168,75,.1);
+  transform:perspective(300px) rotateX(4deg);
+  display:inline-block;
+}
+
+.brand-sub{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:.78rem;
+  font-weight:300;
+  letter-spacing:.3em;
+  color:var(--muted);
+}
+
+.deco-row{display:flex;align-items:center;justify-content:center;gap:.6rem;margin-top:.5rem;}
+.deco-l,.deco-r{flex:1;max-width:90px;height:1px;position:relative;}
+.deco-l{background:linear-gradient(90deg,transparent,var(--gold2));}
+.deco-r{background:linear-gradient(90deg,var(--gold2),transparent);}
+.deco-l::after{content:'';position:absolute;right:-1px;top:50%;width:5px;height:5px;border-right:1.5px solid var(--gold2);border-top:1.5px solid var(--gold2);transform:translateY(-50%) rotate(45deg);}
+.deco-r::before{content:'';position:absolute;left:-1px;top:50%;width:5px;height:5px;border-left:1.5px solid var(--gold2);border-bottom:1.5px solid var(--gold2);transform:translateY(-50%) rotate(45deg);}
+.deco-mid{font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+
+/* ══ MAIN GRID ══ */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1.5fr 1fr;
+  gap:.55rem;
+  flex:1;
+}
+
+/* ══ CANAL BUTTONS ══ */
+.col{display:flex;flex-direction:column;gap:.55rem;}
+
+.btn{
+  flex:1;
+  position:relative;
+  border-radius:16px;
+  padding:.85rem .65rem .75rem;
+  cursor:pointer;
+  /* BASE GLOW BORDER */
+  border:1px solid rgba(255,255,255,.1);
+  background:linear-gradient(145deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.02) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    inset 0 -1px 0 rgba(0,0,0,.3),
+    0 2px 8px rgba(0,0,0,.4);
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+  overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+}
+
+/* Shimmer top line per color */
+.btn::before{
+  content:'';
+  position:absolute;
+  top:0;left:10%;right:10%;
+  height:1px;
+  border-radius:50%;
+  opacity:.5;
+  transition:opacity .3s,left .3s,right .3s;
+}
+/* Inner glow bg */
+.btn::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  opacity:0;
+  transition:opacity .3s;
+}
+
+.btn.morning::before{background:var(--morning);box-shadow:0 0 8px var(--morning);}
+.btn.lunch::before  {background:var(--lunch);  box-shadow:0 0 8px var(--lunch);}
+.btn.night::before  {background:var(--night);  box-shadow:0 0 8px var(--night);}
+.btn.ethnic::before {background:var(--ethnic); box-shadow:0 0 8px var(--ethnic);}
+.btn.drive::before  {background:var(--drive);  box-shadow:0 0 8px var(--drive);}
+.btn.multi::before  {background:#666;}
+
+.btn.morning::after {background:radial-gradient(ellipse at 50% 0%,var(--glow-morning),transparent 70%);}
+.btn.lunch::after   {background:radial-gradient(ellipse at 50% 0%,var(--glow-lunch),transparent 70%);}
+.btn.night::after   {background:radial-gradient(ellipse at 50% 0%,var(--glow-night),transparent 70%);}
+.btn.ethnic::after  {background:radial-gradient(ellipse at 50% 0%,var(--glow-ethnic),transparent 70%);}
+.btn.drive::after   {background:radial-gradient(ellipse at 50% 0%,var(--glow-drive),transparent 70%);}
+
+/* HOVER */
+.btn:hover:not(.locked){
+  transform:translateY(-2px) scale(1.02);
+  border-color:rgba(255,255,255,.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 -1px 0 rgba(0,0,0,.3),
+    0 6px 20px rgba(0,0,0,.5);
+}
+.btn:hover:not(.locked)::before{opacity:1;left:5%;right:5%;}
+.btn:hover:not(.locked)::after{opacity:.7;}
+
+/* ACTIVE / SELECTED */
+.btn.active{transform:translateY(-3px);}
+.btn.active::before{opacity:1;left:0;right:0;}
+.btn.active::after{opacity:1;}
+
+.btn.morning.active{border-color:rgba(255,208,64,.45);box-shadow:0 0 0 1px rgba(255,208,64,.2),0 8px 24px rgba(255,208,64,.2),inset 0 1px 0 rgba(255,208,64,.2);}
+.btn.lunch.active  {border-color:rgba(255,128,64,.45);box-shadow:0 0 0 1px rgba(255,128,64,.2),0 8px 24px rgba(255,128,64,.2),inset 0 1px 0 rgba(255,128,64,.2);}
+.btn.night.active  {border-color:rgba(160,128,255,.45);box-shadow:0 0 0 1px rgba(160,128,255,.2),0 8px 24px rgba(160,128,255,.2),inset 0 1px 0 rgba(160,128,255,.2);}
+.btn.ethnic.active {border-color:rgba(0,229,176,.45);box-shadow:0 0 0 1px rgba(0,229,176,.15),0 8px 24px rgba(0,229,176,.15),inset 0 1px 0 rgba(0,229,176,.2);}
+.btn.drive.active  {border-color:rgba(255,64,144,.45);box-shadow:0 0 0 1px rgba(255,64,144,.15),0 8px 24px rgba(255,64,144,.2),inset 0 1px 0 rgba(255,64,144,.2);}
+
+.btn.locked{cursor:not-allowed;opacity:.35;}
+.btn.locked:hover{transform:none;}
+
+/* Dot indicator */
+.btn-dot{
+  position:absolute;top:9px;right:9px;
+  width:5px;height:5px;border-radius:50%;
+  opacity:0;transition:opacity .3s;
+}
+.btn.morning .btn-dot{background:var(--morning);}
+.btn.lunch   .btn-dot{background:var(--lunch);}
+.btn.night   .btn-dot{background:var(--night);}
+.btn.ethnic  .btn-dot{background:var(--ethnic);}
+.btn.drive   .btn-dot{background:var(--drive);}
+.btn.active .btn-dot{opacity:1;animation:dot-pulse 2s ease-in-out infinite;}
+@keyframes dot-pulse{0%,100%{transform:scale(1);}50%{transform:scale(2.2);opacity:.3;}}
+
+.btn-lock{position:absolute;top:8px;right:8px;font-size:10px;opacity:.4;}
+
+.btn-icon{font-size:1.5rem;margin-bottom:.35rem;display:block;filter:saturate(.4) brightness(.8);transition:filter .3s,transform .3s;position:relative;z-index:1;line-height:1;}
+.btn.active .btn-icon{filter:saturate(1.4) brightness(1.1);transform:scale(1.12);}
+
+.btn-name{
+  font-family:'Orbitron',monospace;
+  font-size:.6rem;
+  font-weight:600;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--white);
+  position:relative;z-index:1;
+  line-height:1.2;
+}
+.btn-desc{font-size:.5rem;color:var(--muted);margin-top:.2rem;line-height:1.4;position:relative;z-index:1;}
+.btn-soon{font-size:.48rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-top:.15rem;position:relative;z-index:1;}
+
+/* ══ CENTRO ══ */
+.center{display:flex;flex-direction:column;gap:.55rem;}
+
+/* ARTWORK */
+.artwork{
+  position:relative;
+  border-radius:18px;
+  overflow:hidden;
+  aspect-ratio:1/1;
+  /* Glowing frame */
+  border:1px solid rgba(200,168,75,.2);
+  box-shadow:
+    0 0 0 1px rgba(200,168,75,.08),
+    inset 0 0 30px rgba(200,168,75,.04),
+    0 4px 20px rgba(0,0,0,.5);
+  background:var(--surface);
+  flex-shrink:0;
+}
+
+.artwork-inner{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 30%,rgba(200,168,75,.08) 0%,transparent 60%);
+}
+
+.artwork-clef{
+  font-family:'Cormorant Garamond',serif;
+  font-size:5rem;
+  color:var(--gold);
+  opacity:.12;
+  line-height:1;
+}
+
+.artwork img{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:cover;
+  display:none;
+}
+
+.artwork-bar{
+  position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(transparent,rgba(7,9,14,.95));
+  padding:.5rem .65rem .45rem;
+}
+.art-genre{font-size:.5rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:.1rem;opacity:.8;}
+.art-title{font-family:'Orbitron',monospace;font-size:.62rem;font-weight:500;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* scanning line effect on artwork */
+.artwork::before{
+  content:'';
+  position:absolute;
+  top:-100%;left:0;right:0;
+  height:40%;
+  background:linear-gradient(transparent,rgba(200,168,75,.03),transparent);
+  animation:scan 4s linear infinite;
+  pointer-events:none;
+  z-index:2;
+}
+@keyframes scan{0%{top:-40%;}100%{top:100%;}}
+
+/* VISUALIZER */
+.vis{
+  display:flex;align-items:flex-end;justify-content:center;
+  gap:2.5px;height:18px;padding:0 .5rem;
+}
+.vb{width:2px;background:var(--gold);border-radius:1px;height:3px;opacity:.15;}
+.vis.on .vb{opacity:.6;animation:vbar .8s ease-in-out infinite;}
+.vis.on .vb:nth-child(1){animation-delay:0s;animation-duration:.9s;}
+.vis.on .vb:nth-child(2){animation-delay:.12s;animation-duration:1.1s;}
+.vis.on .vb:nth-child(3){animation-delay:.06s;animation-duration:.75s;}
+.vis.on .vb:nth-child(4){animation-delay:.18s;animation-duration:1.25s;}
+.vis.on .vb:nth-child(5){animation-delay:.09s;animation-duration:.95s;}
+.vis.on .vb:nth-child(6){animation-delay:.15s;animation-duration:1.05s;}
+.vis.on .vb:nth-child(7){animation-delay:.03s;animation-duration:.85s;}
+.vis.on .vb:nth-child(8){animation-delay:.21s;animation-duration:1.15s;}
+.vis.on .vb:nth-child(9){animation-delay:.07s;animation-duration:.92s;}
+@keyframes vbar{0%,100%{height:3px;}50%{height:15px;}}
+
+/* ══ MASTER CONTROL ══ */
+.master{
+  position:relative;
+  border-radius:16px;
+  padding:.85rem .85rem .8rem;
+  border:1px solid rgba(200,168,75,.15);
+  background:linear-gradient(145deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.01) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    inset 0 -1px 0 rgba(0,0,0,.3),
+    0 4px 16px rgba(0,0,0,.4),
+    0 0 0 1px rgba(200,168,75,.05);
+  transition:border-color .4s,box-shadow .4s;
+}
+
+.master.live{
+  border-color:rgba(200,168,75,.3);
+  box-shadow:
+    inset 0 1px 0 rgba(200,168,75,.1),
+    inset 0 -1px 0 rgba(0,0,0,.3),
+    0 4px 20px rgba(0,0,0,.4),
+    0 0 20px rgba(200,168,75,.08);
+}
+
+.master::before{
+  content:'';position:absolute;
+  top:0;left:15%;right:15%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(200,168,75,.4),transparent);
+  border-radius:50%;
+}
+
+.track-info{margin-bottom:.65rem;}
+.track-lbl{font-size:.5rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.18rem;}
+.track-name{
+  font-family:'Orbitron',monospace;
+  font-size:.75rem;font-weight:500;
+  color:var(--white);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  letter-spacing:.03em;
+}
+.track-genre{font-size:.55rem;color:var(--muted);margin-top:.15rem;}
+
+.controls{display:flex;align-items:center;justify-content:center;gap:.7rem;}
+
+.ctrl-btn{
+  width:36px;height:36px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.1);
+  background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 6px rgba(0,0,0,.4);
+  color:var(--muted);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.85rem;
+  transition:all .2s;
+}
+.ctrl-btn:hover:not(.off){
+  border-color:rgba(200,168,75,.3);
+  color:var(--gold);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 2px 10px rgba(200,168,75,.15);
+}
+.ctrl-btn.off{opacity:.2;cursor:not-allowed;}
+
+.play-main{
+  width:52px;height:52px;
+  border-radius:50%;
+  border:1.5px solid var(--gold);
+  background:linear-gradient(145deg,rgba(200,168,75,.15),rgba(200,168,75,.05));
+  box-shadow:
+    inset 0 1px 0 rgba(200,168,75,.2),
+    0 4px 16px rgba(200,168,75,.15),
+    0 0 0 4px rgba(200,168,75,.05);
+  color:var(--mint);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;
+  transition:all .25s;
+}
+.play-main:hover{
+  background:linear-gradient(145deg,rgba(200,168,75,.25),rgba(200,168,75,.1));
+  box-shadow:inset 0 1px 0 rgba(200,168,75,.3),0 6px 24px rgba(200,168,75,.25),0 0 0 6px rgba(200,168,75,.08);
+  transform:scale(1.06);
+}
+.play-main:active{transform:scale(.93);}
+
+/* ══ FOOTER ══ */
+.footer{
+  text-align:center;
+  padding:.5rem 0 .6rem;
+  border-top:1px solid rgba(200,168,75,.07);
+}
+.footer-url{
+  font-family:'Orbitron',monospace;
+  font-size:.58rem;
+  font-weight:500;
+  letter-spacing:.18em;
+  color:var(--dim);
+  text-transform:lowercase;
+}
+.footer-url em{color:var(--gold);font-style:normal;opacity:.6;}
+
+/* ══ LOADER ══ */
+.loader{
+  position:fixed;inset:0;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;
+  z-index:1000;
+  transition:opacity .8s,visibility .8s;
+}
 .loader.out{opacity:0;visibility:hidden;}
-.loader-logo{font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:700;color:var(--gold);letter-spacing:.22em;animation:fp 1.5s ease-in-out infinite;display:flex;align-items:center;gap:.4rem;}
-.loader-clef{font-size:3rem;margin-top:-.15em;}
-.loader-sub{font-family:'Cormorant Garamond',serif;font-size:.85rem;font-style:italic;color:var(--gray);letter-spacing:.15em;}
-.loader-dots{display:flex;gap:7px;}
-.loader-dots span{width:5px;height:5px;border-radius:50%;background:var(--gold);opacity:.25;animation:dp 1.2s ease-in-out infinite;}
-.loader-dots span:nth-child(2){animation-delay:.2s;}
-.loader-dots span:nth-child(3){animation-delay:.4s;}
+.ld-clef{font-family:'Cormorant Garamond',serif;font-size:3.5rem;color:var(--gold);text-shadow:0 0 30px rgba(200,168,75,.6);animation:clef-glow 1.5s ease-in-out infinite;}
+.ld-name{
+  font-family:'Orbitron',monospace;
+  font-size:1.8rem;
+  font-weight:800;
+  letter-spacing:.18em;
+  color:var(--gold2);
+  text-shadow:
+    0 1px 0 #A07828,
+    0 2px 0 #8A6620,
+    0 3px 0 #744E10,
+    0 4px 0 #5E3A00,
+    0 5px 8px rgba(0,0,0,.6),
+    0 0 20px rgba(200,168,75,.3);
+  transform:perspective(300px) rotateX(4deg);
+  display:inline-block;
+  animation:fp 1.5s ease-in-out infinite;
+}
+.ld-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.8rem;color:var(--muted);letter-spacing:.2em;}
+.ld-dots{display:flex;gap:7px;}
+.ld-dots span{width:5px;height:5px;border-radius:50%;background:var(--gold);opacity:.15;animation:dp 1.2s ease-in-out infinite;}
+.ld-dots span:nth-child(2){animation-delay:.2s;}
+.ld-dots span:nth-child(3){animation-delay:.4s;}
 @keyframes fp{0%,100%{opacity:.4;}50%{opacity:1;}}
-@keyframes dp{0%,100%{opacity:.25;transform:scale(1);}50%{opacity:1;transform:scale(1.5);}}
-.canal{animation:si .55s cubic-bezier(.4,0,.2,1) both;}
-.canal:nth-child(1){animation-delay:.06s;}
-.canal:nth-child(2){animation-delay:.12s;}
-.canal:nth-child(3){animation-delay:.18s;}
-.canal:nth-child(4){animation-delay:.24s;}
-.canal:nth-child(5){animation-delay:.30s;}
-.canal:nth-child(6){animation-delay:.36s;}
-@keyframes si{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes dp{0%,100%{opacity:.15;transform:scale(1);}50%{opacity:1;transform:scale(1.6);}}
+
+/* entrance */
+.btn{animation:si .5s cubic-bezier(.4,0,.2,1) both;}
+.col:first-child .btn:nth-child(1){animation-delay:.05s;}
+.col:first-child .btn:nth-child(2){animation-delay:.12s;}
+.col:first-child .btn:nth-child(3){animation-delay:.19s;}
+.col:last-child  .btn:nth-child(1){animation-delay:.22s;}
+.col:last-child  .btn:nth-child(2){animation-delay:.29s;}
+.col:last-child  .btn:nth-child(3){animation-delay:.36s;}
+@keyframes si{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+
 audio{display:none;}
-@media(min-width:520px){.app{padding:0 2rem 2.5rem;}.canal-icon{font-size:2.8rem;}}
 </style>
 </head>
 <body>
+
 <div class="loader" id="loader">
-  <div class="loader-logo"><span class="loader-clef">𝄞</span>STUMUSIC</div>
-  <div class="loader-sub">player</div>
-  <div class="loader-dots"><span></span><span></span><span></span></div>
+  <div class="ld-clef">𝄞</div>
+  <div class="ld-name">SONOplayer</div>
+  <div class="ld-sub">stumusicpro.cl</div>
+  <div class="ld-dots"><span></span><span></span><span></span></div>
 </div>
 
 <div class="app">
 
+  <!-- HEADER -->
   <header class="header">
-    <div class="header-deco">
-      <div class="deco-line left-line"></div>
-      <div class="logo-wrap">
-        <div class="logo-clef">𝄞</div>
-        <div class="logo-text-wrap">
-          <div class="logo">
-            <span class="logo-stu">STU</span><span class="logo-music">MUSIC</span>
-          </div>
-          <span class="logo-player">player</span>
-        </div>
+    <div class="brand-row">
+      <div class="clef">𝄞</div>
+      <div class="brand-text">
+        <div class="brand-name">SONOplayer</div>
+        <div class="brand-sub">música ambiental inteligente</div>
       </div>
-      <div class="deco-line right-line"></div>
     </div>
-    <div style="display:flex;align-items:center;gap:.75rem;margin-top:.5rem;">
-      <div class="tagline" style="flex:1;text-align:center;">Música Ambiental Premium &nbsp;·&nbsp; Multi-Canal &nbsp;·&nbsp; 24/7</div>
+    <div class="deco-row">
+      <div class="deco-l"></div>
+      <div class="deco-mid">Selecciona tu canal</div>
+      <div class="deco-r"></div>
     </div>
   </header>
 
-  <div class="now-playing" id="now-playing">
-    <button class="play-btn" id="play-btn" onclick="togglePlay()" aria-label="Play / Pause">
-      <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-      <svg id="icon-pause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-    </button>
-    <div class="np-info">
-      <div class="np-label" id="np-label">Selecciona un canal</div>
-      <div class="np-track" id="np-track">— Elige un género para comenzar —</div>
-      <div class="np-genre" id="np-genre">Powered by TAW Radio · Música IA</div>
-    </div>
-    <div class="vis" id="vis">
-      <div class="vis-bar"></div>
-      <div class="vis-bar"></div>
-      <div class="vis-bar"></div>
-      <div class="vis-bar"></div>
-      <div class="vis-bar"></div>
-    </div>
-  </div>
-<div class="section-label"><span>Selecciona tu canal</span></div>
-  <div class="canales">
+  <!-- GRID -->
+  <div class="grid">
 
-    <div class="canal jazz" onclick="selectCanal(this)"
-         data-track="Jazz_Cafe-de-Flore_70BPM"
-         data-genre="Terrace & Jazz · Ambient Premium"
-         data-bpm="68–78 BPM"
-         data-stream="https://stream.stumusicpro.cl/jazz"
-         role="button" tabindex="0">
-      <div class="canal-dot"></div>
-      <span class="canal-icon">🎷</span>
-      <div class="canal-name">Jazz</div>
-      <div class="canal-desc">Café de Flore · Bistró parisino · Fine dining</div>
-      <span class="canal-badge">68–78 BPM</span>
-    </div>
+    <!-- COL IZQUIERDA -->
+    <div class="col">
 
-    <div class="canal ambient" onclick="selectCanal(this)"
-         data-track="CinematicAmbient_Deep-Space-One_65BPM"
-         data-genre="Chill · Lounge · Spa"
-         data-bpm="65–80 BPM"
-         data-stream="https://stream.stumusicpro.cl/jazz"
-         role="button" tabindex="0">
-      <div class="canal-dot"></div>
-      <span class="canal-icon">🌊</span>
-      <div class="canal-name">Ambient</div>
-      <div class="canal-desc">Chillout · Soft Piano · Acoustic · Spa</div>
-      <span class="canal-badge">65–80 BPM</span>
+      <div class="btn morning" onclick="sel(this)"
+           data-stream="https://stream.stumusicpro.cl/jazz"
+           data-genre="Mañana · Energía · 70–90 BPM"
+           role="button" tabindex="0">
+        <div class="btn-dot"></div>
+        <span class="btn-icon">☀️</span>
+        <div class="btn-name">Mañana</div>
+        <div class="btn-desc">Bossa · Jazz · Acoustic</div>
+      </div>
+
+      <div class="btn lunch" onclick="sel(this)"
+           data-stream="https://stream.stumusicpro.cl/jazz"
+           data-genre="Almuerzo · Festivo · 80–100 BPM"
+           role="button" tabindex="0">
+        <div class="btn-dot"></div>
+        <span class="btn-icon">🍽️</span>
+        <div class="btn-name">Almuerzo</div>
+        <div class="btn-desc">Cumbia · Bossa · Pop</div>
+      </div>
+
+      <div class="btn night" onclick="sel(this)"
+           data-stream="https://stream.stumusicpro.cl/jazz"
+           data-genre="Tarde · Noche · 70–95 BPM"
+           role="button" tabindex="0">
+        <div class="btn-dot"></div>
+        <span class="btn-icon">🌆</span>
+        <div class="btn-name">Tarde · Noche</div>
+        <div class="btn-desc">Smooth Jazz · Lounge</div>
+      </div>
+
     </div>
 
-    <div class="canal technos" onclick="selectCanal(this)"
-         data-track="TechnoAndino_Cosmos-Andino_122BPM"
-         data-genre="TechnoAndino · TechnoTango"
-         data-bpm="100–130 BPM"
-         data-stream="https://stream.stumusicpro.cl/jazz"
-         role="button" tabindex="0">
-      <div class="canal-dot"></div>
-      <span class="canal-icon">⚡</span>
-      <div class="canal-name">Technos</div>
-      <div class="canal-desc">TechnoAndino · TechnoTango · World Fusion</div>
-      <span class="canal-badge">100–130 BPM</span>
+    <!-- COL CENTRO -->
+    <div class="center">
+
+      <div class="artwork" id="artwork">
+        <div class="artwork-inner">
+          <div class="artwork-clef">𝄞</div>
+        </div>
+        <img id="art-img" src="" alt="Carátula"/>
+        <div class="artwork-bar" id="art-bar" style="display:none">
+          <div class="art-genre" id="art-genre"></div>
+          <div class="art-title" id="art-title"></div>
+        </div>
+      </div>
+
+      <div class="vis" id="vis">
+        <div class="vb"></div><div class="vb"></div><div class="vb"></div>
+        <div class="vb"></div><div class="vb"></div><div class="vb"></div>
+        <div class="vb"></div><div class="vb"></div><div class="vb"></div>
+      </div>
+
+      <div class="master" id="master">
+        <div class="track-info">
+          <div class="track-lbl" id="tlbl">Selecciona un canal</div>
+          <div class="track-name" id="tname">— Elige el ambiente —</div>
+          <div class="track-genre" id="tgenre">Powered by TAW Radio · Música IA</div>
+        </div>
+        <div class="controls">
+          <div class="ctrl-btn off" title="Anterior">⏮</div>
+          <div class="play-main" id="play-btn" onclick="togglePlay()">▶</div>
+          <div class="ctrl-btn off" title="Siguiente">⏭</div>
+        </div>
+      </div>
+
     </div>
 
-    <div class="canal reggaeton" onclick="selectCanal(this)"
-         data-track="Reggaeton_Fuego-Latino_95BPM"
-         data-genre="Urban · Lo que suena hoy"
-         data-bpm="90–100 BPM"
-         data-stream="https://stream.stumusicpro.cl/jazz"
-         role="button" tabindex="0">
-      <div class="canal-dot"></div>
-      <span class="canal-icon">🔥</span>
-      <div class="canal-name">Reggaeton</div>
-      <div class="canal-desc">Urban · Trap Latino · Lo que suena hoy</div>
-      <span class="canal-badge">90–100 BPM</span>
+    <!-- COL DERECHA -->
+    <div class="col">
+
+      <div class="btn ethnic" onclick="sel(this)"
+           data-stream="https://stream.stumusicpro.cl/jazz"
+           data-genre="Temática · Étnica · 80–110 BPM"
+           role="button" tabindex="0">
+        <div class="btn-dot"></div>
+        <span class="btn-icon">🌍</span>
+        <div class="btn-name">Temática</div>
+        <div class="btn-desc">Peruana · Árabe · más</div>
+      </div>
+
+      <div class="btn drive" onclick="sel(this)"
+           data-stream="https://stream.stumusicpro.cl/jazz"
+           data-genre="Drive · TAW Radio · 95–125 BPM"
+           role="button" tabindex="0">
+        <div class="btn-dot"></div>
+        <span class="btn-icon">🚗</span>
+        <div class="btn-name">Drive</div>
+        <div class="btn-desc">TAW Radio · En ruta</div>
+      </div>
+
+      <div class="btn multi locked" role="button" tabindex="0" aria-disabled="true">
+        <div class="btn-lock">🔒</div>
+        <span class="btn-icon">🎬</span>
+        <div class="btn-name">Multimedia</div>
+        <div class="btn-desc">Audio · Video · Karaoke</div>
+        <div class="btn-soon">Próximamente</div>
+      </div>
+
     </div>
 
-    <div class="canal latino" onclick="selectCanal(this)"
-         data-track="BossaNova_Ipanema-Dreams_80BPM"
-         data-genre="Cumbia · Bossa · Pop Latino"
-         data-bpm="80–100 BPM"
-         data-stream="https://stream.stumusicpro.cl/jazz"
-         role="button" tabindex="0">
-      <div class="canal-dot"></div>
-      <span class="canal-icon">🌎</span>
-      <div class="canal-name">Latino Mix</div>
-      <div class="canal-desc">Cumbia · Bossa Nova · Bolero · Pop Latino</div>
-      <span class="canal-badge">80–100 BPM</span>
-    </div>
-
-    <div class="canal multi locked" role="button" tabindex="0" aria-disabled="true">
-      <div class="canal-lock">🔒</div>
-      <span class="canal-icon">🎬</span>
-      <div class="canal-name">Multimedia</div>
-      <div class="canal-desc">Audio · Video · Karaoke · Paisajes · Eventos</div>
-      <span class="canal-badge">Próximamente</span>
-      <div class="canal-soon">2026</div>
-    </div>
-
-  </div>
-<div class="stats">
-    <div class="stat">
-      <div class="stat-val">500+</div>
-      <div class="stat-label">Tracks</div>
-    </div>
-    <div class="stat">
-      <div class="stat-val">24/7</div>
-      <div class="stat-label">En vivo</div>
-    </div>
-    <div class="stat">
-      <div class="stat-val">100%</div>
-      <div class="stat-label">Música IA</div>
-    </div>
   </div>
 
+  <!-- FOOTER -->
   <footer class="footer">
-    <div class="footer-brand">STUMUSIC &nbsp;·&nbsp; Música Ambiental para Negocios</div>
-    <div class="footer-sub">Powered by TAW Radio &nbsp;·&nbsp; Edmundo del Pino &nbsp;·&nbsp; 2026</div>
+    <div class="footer-url"><em>www.</em>stumusicpro.cl</div>
   </footer>
 
 </div>
@@ -303,53 +619,68 @@ audio{display:none;}
 <audio id="player" preload="none"></audio>
 
 <script>
-var player = document.getElementById('player');
-var playing = false;
-var current = null;
+var player=document.getElementById('player');
+var playing=false;
+var current=null;
+var tid=null;
 
-window.addEventListener('load', function(){
-  setTimeout(function(){
-    document.getElementById('loader').classList.add('out');
-  }, 1000);
+window.addEventListener('load',function(){
+  setTimeout(function(){document.getElementById('loader').classList.add('out');},1100);
 });
 
-function selectCanal(el){
+function fetchTrack(){
+  fetch('https://public.radio.co/stations/s2aa019d6b/status')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d||!d.current_track) return;
+      var t=d.current_track;
+      var title=t.title||'Sonando ahora';
+      document.getElementById('tname').textContent=title;
+      document.getElementById('art-title').textContent=title;
+      if(t.artwork_url){
+        var img=document.getElementById('art-img');
+        img.src=t.artwork_url;
+        img.style.display='block';
+        document.querySelector('.artwork-inner').style.display='none';
+        document.getElementById('art-bar').style.display='block';
+      }
+    })
+    .catch(function(){});
+}
+
+function sel(el){
   if(el.classList.contains('locked')) return;
-  document.querySelectorAll('.canal').forEach(function(c){c.classList.remove('active');});
+  document.querySelectorAll('.btn').forEach(function(b){b.classList.remove('active');});
   el.classList.add('active');
-  current = el;
-  var track  = el.dataset.track || 'Sonando ahora';
-  var genre  = el.dataset.genre;
-  var stream = el.dataset.stream;
-  var bpm    = el.dataset.bpm;
-  document.getElementById('np-label').textContent = 'Sonando ahora · ' + bpm;
-  document.getElementById('np-track').textContent = track;
-  document.getElementById('np-genre').textContent = genre;
-  document.getElementById('now-playing').classList.add('live');
-  player.src = stream;
-  player.play().then(function(){setPlaying(true);}).catch(function(){setPlaying(true);});
+  current=el;
+  var g=el.dataset.genre;
+  var s=el.dataset.stream;
+  document.getElementById('tlbl').textContent='Sonando ahora';
+  document.getElementById('tname').textContent='Cargando...';
+  document.getElementById('tgenre').textContent=g;
+  document.getElementById('art-genre').textContent=g;
+  document.getElementById('master').classList.add('live');
+  player.src=s;
+  player.play().then(function(){setP(true);}).catch(function(){setP(true);});
+  fetchTrack();
+  if(tid) clearInterval(tid);
+  tid=setInterval(fetchTrack,10000);
 }
 
 function togglePlay(){
-  if(!current){
-    var first = document.querySelector('.canal:not(.locked)');
-    if(first) selectCanal(first);
-    return;
-  }
-  if(playing){player.pause();setPlaying(false);}
-  else{player.play().catch(function(){});setPlaying(true);}
+  if(!current){var f=document.querySelector('.btn:not(.locked)');if(f) sel(f);return;}
+  if(playing){player.pause();setP(false);}
+  else{player.play().catch(function(){});setP(true);}
 }
 
-function setPlaying(state){
-  playing = state;
-  document.getElementById('icon-play').style.display  = state ? 'none'  : 'block';
-  document.getElementById('icon-pause').style.display = state ? 'block' : 'none';
-  var vis = document.getElementById('vis');
-  state ? vis.classList.add('active') : vis.classList.remove('active');
+function setP(s){
+  playing=s;
+  document.getElementById('play-btn').textContent=s?'⏸':'▶';
+  document.getElementById('vis').classList.toggle('on',s);
 }
 
-document.querySelectorAll('.canal:not(.locked)').forEach(function(el){
-  el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ')selectCanal(el);});
+document.querySelectorAll('.btn:not(.locked)').forEach(function(el){
+  el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ') sel(el);});
 });
 </script>
 </body>
