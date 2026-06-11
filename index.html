@@ -556,19 +556,21 @@ function checkLayout(){
   });
 }
 
-/* Progress bar — tiempo real del audio */
+/* Progress bar — simulación para stream en vivo */
+var trackDuration = 150; // duración estimada 2:30 min
 function startProgress(mode){
   if(progInterval) clearInterval(progInterval);
+  elapsed=0;
   progInterval=setInterval(function(){
-    var cur=player.currentTime||0;
-    var dur=player.duration||0;
-    var pct=dur>0?(cur/dur)*100:0;
+    elapsed++;
+    var pct=Math.min((elapsed/trackDuration)*100,100);
     var p=document.getElementById('prog-'+mode);
     if(p) p.style.width=pct+'%';
     var t1=document.getElementById('pt1-'+mode);
-    if(t1) t1.textContent=fmtTime(Math.floor(cur));
+    if(t1) t1.textContent=fmtTime(elapsed);
     var t2=document.getElementById('pt2-'+mode);
-    if(t2) t2.textContent=dur>0?fmtTime(Math.floor(dur)):'--:--';
+    if(t2) t2.textContent=fmtTime(trackDuration);
+    if(elapsed>=trackDuration) elapsed=0;
   },1000);
 }
 
@@ -576,17 +578,26 @@ function fmtTime(s){var m=Math.floor(s/60);return m+':'+String(s%60).padStart(2,
 
 function fetchTrack(mode){
   if(!current) return;
-  // Extrae el mount del stream URL — ej: /manana
   var streamUrl=current.dataset.stream||'';
   var mount=streamUrl.split('/').pop();
 
+  // Cargar carátula del canal
+  var coverUrl='https://stream.stumusicpro.cl/covers/'+mount+'.jpg?t='+Date.now();
+  var img=document.getElementById('img-'+mode);
+  if(img){
+    img.src=coverUrl;
+    img.style.display='block';
+    var inner=document.querySelector('#art-'+mode+' .artwork-inner');
+    if(inner) inner.style.display='none';
+  }
+
+  // Obtener nombre del track desde Icecast2
   fetch('https://stream.stumusicpro.cl/status-json.xsl')
     .then(function(r){return r.json();})
     .then(function(d){
       if(!d||!d.icestats||!d.icestats.source) return;
       var sources=d.icestats.source;
       if(!Array.isArray(sources)) sources=[sources];
-      // Busca el canal que coincide con el mount activo
       var src=null;
       for(var i=0;i<sources.length;i++){
         var lu=sources[i].listenurl||'';
@@ -594,10 +605,14 @@ function fetchTrack(mode){
       }
       if(!src) return;
       var raw=src.title||'Sonando ahora';
-      // Limpia el título — quita "edmundodelpino - " o "Edmundodelpino - "
       var title=raw.replace(/^[Ee]dmundodelpino\s*-\s*/,'').replace(/\.mp3$/i,'').trim();
       var tn=document.getElementById('tname-'+mode);
-      if(tn) tn.textContent=title;
+      if(tn && tn.textContent !== title){
+        tn.textContent=title;
+        elapsed=0;
+        // Actualizar carátula cuando cambia el track
+        if(img) img.src='https://stream.stumusicpro.cl/covers/'+mount+'.jpg?t='+Date.now();
+      }
     })
     .catch(function(){});
 }
