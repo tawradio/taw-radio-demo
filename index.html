@@ -556,41 +556,48 @@ function checkLayout(){
   });
 }
 
-/* Progress bar simulation */
+/* Progress bar — tiempo real del audio */
 function startProgress(mode){
   if(progInterval) clearInterval(progInterval);
-  elapsed=0;
-  var dur=150;
   progInterval=setInterval(function(){
-    elapsed++;
-    var pct=Math.min((elapsed/dur)*100,100);
+    var cur=player.currentTime||0;
+    var dur=player.duration||0;
+    var pct=dur>0?(cur/dur)*100:0;
     var p=document.getElementById('prog-'+mode);
     if(p) p.style.width=pct+'%';
     var t1=document.getElementById('pt1-'+mode);
-    if(t1) t1.textContent=fmtTime(elapsed);
+    if(t1) t1.textContent=fmtTime(Math.floor(cur));
     var t2=document.getElementById('pt2-'+mode);
-    if(t2) t2.textContent=fmtTime(dur);
-    if(elapsed>=dur) elapsed=0;
+    if(t2) t2.textContent=dur>0?fmtTime(Math.floor(dur)):'--:--';
   },1000);
 }
 
 function fmtTime(s){var m=Math.floor(s/60);return m+':'+String(s%60).padStart(2,'0');}
 
 function fetchTrack(mode){
-  fetch('https://public.radio.co/stations/s2aa019d6b/status')
+  if(!current) return;
+  // Extrae el mount del stream URL — ej: /manana
+  var streamUrl=current.dataset.stream||'';
+  var mount=streamUrl.split('/').pop();
+
+  fetch('https://stream.stumusicpro.cl/status-json.xsl')
     .then(function(r){return r.json();})
     .then(function(d){
-      if(!d||!d.current_track) return;
-      var t=d.current_track;
-      var title=t.title||'Sonando ahora';
+      if(!d||!d.icestats||!d.icestats.source) return;
+      var sources=d.icestats.source;
+      if(!Array.isArray(sources)) sources=[sources];
+      // Busca el canal que coincide con el mount activo
+      var src=null;
+      for(var i=0;i<sources.length;i++){
+        var lu=sources[i].listenurl||'';
+        if(lu.indexOf('/'+mount)>-1){src=sources[i];break;}
+      }
+      if(!src) return;
+      var raw=src.title||'Sonando ahora';
+      // Limpia el título — quita "edmundodelpino - " o "Edmundodelpino - "
+      var title=raw.replace(/^[Ee]dmundodelpino\s*-\s*/,'').replace(/\.mp3$/i,'').trim();
       var tn=document.getElementById('tname-'+mode);
       if(tn) tn.textContent=title;
-      if(t.artwork_url){
-        var img=document.getElementById('img-'+mode);
-        if(img){img.src=t.artwork_url;img.style.display='block';}
-        var inner=document.querySelector('#art-'+mode+' .artwork-inner');
-        if(inner) inner.style.display='none';
-      }
     })
     .catch(function(){});
 }
