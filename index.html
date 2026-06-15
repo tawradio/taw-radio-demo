@@ -62,6 +62,10 @@ body::before{content:'';position:fixed;top:-10%;left:50%;transform:translateX(-5
 .btn.night.active{border-color:rgba(160,128,255,.5);box-shadow:0 0 0 1px rgba(160,128,255,.2),0 8px 24px rgba(160,128,255,.2);}
 .btn.ethnic.active{border-color:rgba(0,229,176,.5);box-shadow:0 0 0 1px rgba(0,229,176,.15),0 8px 24px rgba(0,229,176,.15);}
 .btn.drive.active{border-color:rgba(255,64,144,.5);box-shadow:0 0 0 1px rgba(255,64,144,.15),0 8px 24px rgba(255,64,144,.2);}
+.btn.multi::before{background:#00C8E8;box-shadow:0 0 8px #00C8E8;}
+.btn.multi::after{background:radial-gradient(ellipse at 50% 0%,rgba(0,200,232,.12),transparent 70%);}
+.btn.multi .btn-dot{background:#00C8E8;}
+.btn.multi.active{border-color:rgba(0,200,232,.5);box-shadow:0 0 0 1px rgba(0,200,232,.15),0 8px 24px rgba(0,200,232,.2);}
 .btn.locked{cursor:not-allowed;opacity:.35;}
 .btn.locked:hover{transform:none;}
 .btn-dot{position:absolute;top:8px;right:8px;width:5px;height:5px;border-radius:50%;opacity:0;transition:opacity .3s;}
@@ -249,9 +253,9 @@ audio{display:none;}
           <div class="progress-time"><span class="pt" id="pt1-p">0:00</span><span class="pt" id="pt2-p">--:--</span></div></div>
         </div>
         <div class="controls" style="gap:.5rem;">
-          <div class="ctrl-btn off" style="width:30px;height:30px;font-size:.75rem;">⏮</div>
+          <div class="ctrl-btn" onclick="prevTrack()" style="width:30px;height:30px;font-size:.75rem;">⏮</div>
           <div class="play-main" id="play-p" onclick="togglePlay('p')" style="width:44px;height:44px;font-size:1.15rem;">▶</div>
-          <div class="ctrl-btn off" style="width:30px;height:30px;font-size:.75rem;">⏭</div>
+          <div class="ctrl-btn" onclick="nextTrack()" style="width:30px;height:30px;font-size:.75rem;">⏭</div>
         </div>
       </div>
     </div>
@@ -281,11 +285,10 @@ audio{display:none;}
         <div class="btn-name" style="font-size:.56rem;">Drive</div>
         <div class="btn-desc" style="font-size:.46rem;margin-top:.15rem;">TAW Radio · En ruta</div>
       </div>
-      <div class="btn multi locked" role="button" tabindex="0" aria-disabled="true">
-        <div class="btn-lock">🔒</div><span class="btn-icon" style="font-size:1.35rem;margin-bottom:.3rem;">🎬</span>
+      <div class="btn multi" id="btn-multi-p" onclick="sel(this,'p')" data-stream="" data-genre="Multimedia · Audio · Video" role="button" tabindex="0">
+        <div class="btn-dot"></div><span class="btn-icon" style="font-size:1.35rem;margin-bottom:.3rem;">🎬</span>
         <div class="btn-name" style="font-size:.56rem;">Multimedia</div>
         <div class="btn-desc" style="font-size:.46rem;margin-top:.15rem;">Audio · Video</div>
-        <div class="btn-soon" style="font-size:.44rem;margin-top:.15rem;">Próximamente</div>
       </div>
     </div>
   </div>
@@ -333,11 +336,10 @@ audio{display:none;}
         <div class="btn-name" style="font-size:.6rem;">Drive</div>
         <div class="btn-desc" style="font-size:.5rem;margin-top:.2rem;">TAW Radio · En ruta</div>
       </div>
-      <div class="btn multi locked" role="button" tabindex="0" aria-disabled="true">
-        <div class="btn-lock">🔒</div><span class="btn-icon" style="font-size:1.55rem;margin-bottom:.35rem;">🎬</span>
+      <div class="btn multi" id="btn-multi-l" onclick="sel(this,'l')" data-stream="" data-genre="Multimedia · Audio · Video" role="button" tabindex="0">
+        <div class="btn-dot"></div><span class="btn-icon" style="font-size:1.55rem;margin-bottom:.35rem;">🎬</span>
         <div class="btn-name" style="font-size:.6rem;">Multimedia</div>
         <div class="btn-desc" style="font-size:.5rem;margin-top:.2rem;">Audio · Video</div>
-        <div class="btn-soon" style="font-size:.46rem;margin-top:.15rem;">Próximamente</div>
       </div>
     </div>
   </div>
@@ -352,9 +354,9 @@ audio{display:none;}
         <div class="progress-time"><span class="pt" id="pt1-l">0:00</span><span class="pt" id="pt2-l">--:--</span></div></div>
       </div>
       <div class="controls" style="gap:.6rem;">
-        <div class="ctrl-btn off" style="width:32px;height:32px;font-size:.8rem;">⏮</div>
+        <div class="ctrl-btn" onclick="prevTrack()" style="width:32px;height:32px;font-size:.8rem;">⏮</div>
         <div class="play-main" id="play-l" onclick="togglePlay('l')" style="width:48px;height:48px;font-size:1.25rem;">▶</div>
-        <div class="ctrl-btn off" style="width:32px;height:32px;font-size:.8rem;">⏭</div>
+        <div class="ctrl-btn" onclick="nextTrack()" style="width:32px;height:32px;font-size:.8rem;">⏭</div>
       </div>
     </div>
   </div>
@@ -376,6 +378,15 @@ audio{display:none;}
 
 <audio id="player" preload="none"></audio>
 <script>
+// Leer cliente de URL
+var urlParams=new URLSearchParams(window.location.search);
+var cliente=urlParams.get('cliente')||'sono-customers';
+var multiStream='https://stream.stumusicpro.cl/'+cliente;
+var btnMP=document.getElementById('btn-multi-p');
+var btnML=document.getElementById('btn-multi-l');
+if(btnMP) btnMP.dataset.stream=multiStream;
+if(btnML) btnML.dataset.stream=multiStream;
+
 var player=document.getElementById('player');
 var playing=false;var current=null;var currentMode='l';
 var tid=null;var progInterval=null;var elapsed=0;
@@ -467,6 +478,37 @@ function setP(s,mode){
   var v=document.getElementById('vis-'+mode);if(v) v.classList.toggle('on',s);
   if(!s&&progInterval){clearInterval(progInterval);progInterval=null;}
   else if(s&&!progInterval) startProgress(mode);
+}
+
+
+var channelList=[];
+var channelIndex=0;
+
+function buildChannelList(){
+  channelList=[];
+  document.querySelectorAll('.btn:not(.locked)').forEach(function(b){
+    if(b.dataset.stream) channelList.push(b);
+  });
+}
+
+function prevTrack(){
+  buildChannelList();
+  if(!channelList.length) return;
+  if(current){
+    var idx=channelList.indexOf(current);
+    channelIndex=(idx-1+channelList.length)%channelList.length;
+  } else { channelIndex=channelList.length-1; }
+  sel(channelList[channelIndex],currentMode);
+}
+
+function nextTrack(){
+  buildChannelList();
+  if(!channelList.length) return;
+  if(current){
+    var idx=channelList.indexOf(current);
+    channelIndex=(idx+1)%channelList.length;
+  } else { channelIndex=0; }
+  sel(channelList[channelIndex],currentMode);
 }
 
 document.querySelectorAll('.btn:not(.locked)').forEach(function(el){
