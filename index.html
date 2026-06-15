@@ -17,7 +17,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--white);font-family:'I
 body::before{content:'';position:fixed;top:-10%;left:50%;transform:translateX(-50%);width:120vw;height:50vh;background:radial-gradient(ellipse at center,rgba(200,168,75,.04) 0%,transparent 60%);pointer-events:none;}
 
 /* ── APP ── */
-.app{position:relative;z-index:1;max-width:520px;margin:0 auto;min-height:100vh;padding:.6rem .9rem .3rem;display:flex;flex-direction:column;gap:.4rem;}
+.app{position:relative;z-index:1;max-width:520px;margin:0 auto;min-height:100vh;padding:.4rem .9rem .2rem;display:flex;flex-direction:column;gap:.2rem;}
 
 /* ── STATUS BAR ── */
 .statusbar{display:flex;align-items:center;justify-content:space-between;padding:0 .2rem;}
@@ -25,10 +25,10 @@ body::before{content:'';position:fixed;top:-10%;left:50%;transform:translateX(-5
 .sb-time{font-family:'Orbitron',monospace;font-size:.95rem;font-weight:600;color:var(--silver2);letter-spacing:.12em;text-shadow:0 0 10px rgba(200,200,200,.3);}
 
 /* ── HEADER ── */
-.header{text-align:center;padding-bottom:.25rem;position:relative;}
+.header{text-align:center;padding-bottom:.1rem;position:relative;}
 .header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(200,168,75,.5) 30%,rgba(200,168,75,.8) 50%,rgba(200,168,75,.5) 70%,transparent 100%);}
 .logo-img{width:90%;max-width:480px;height:auto;display:block;margin:0 auto .1rem;}
-.deco-row{display:flex;align-items:center;justify-content:center;gap:.5rem;margin-top:.2rem;}
+.deco-row{display:flex;align-items:center;justify-content:center;gap:.5rem;margin-top:.05rem;}
 .deco-l,.deco-r{flex:1;max-width:80px;height:1px;position:relative;}
 .deco-l{background:linear-gradient(90deg,transparent,var(--gold2));}
 .deco-r{background:linear-gradient(90deg,var(--gold2),transparent);}
@@ -124,7 +124,7 @@ body::before{content:'';position:fixed;top:-10%;left:50%;transform:translateX(-5
 .play-main:active{transform:scale(.93);}
 
 /* ── FOOTER ── */
-.footer{text-align:center;border-top:1px solid rgba(192,192,192,.15);padding:.2rem 0 .3rem;}
+.footer{text-align:center;border-top:1px solid rgba(192,192,192,.15);padding:.1rem 0 .25rem;margin-top:-.1rem;}
 .footer-logo-row{display:flex;align-items:center;justify-content:center;gap:.4rem;margin-bottom:.2rem;}
 .footer-logo-img{width:50%;max-width:240px;height:auto;opacity:.85;}
 .footer-mr{font-family:'Orbitron',monospace;font-size:.6rem;font-weight:600;color:var(--silver);opacity:.8;}
@@ -222,6 +222,7 @@ audio{display:none;}
 
   <header class="header">
     <img class="logo-img" src="https://tawradio.github.io/sonoplayer-drive/sonoplayer-logo.png" alt="SONOplayer">
+    <div style="text-align:right;padding-right:.3rem;margin-top:-.3rem;margin-bottom:.1rem;"><span class="sb-time" id="clock">00:00</span></div>
     <div class="deco-row">
       <div class="deco-l"></div>
       <div class="deco-mid">Selecciona tu canal</div>
