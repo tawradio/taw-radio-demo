@@ -208,6 +208,20 @@ body::before{content:'';position:fixed;top:-10%;left:50%;transform:translateX(-5
 }
 audio{display:none;}
 
+/* ── FIX VIDEO ── */
+#video-wrap-p, #video-wrap-l{
+  background:#000 !important;
+  border-radius:16px;
+}
+#videoPlayer, #videoPlayerL{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  display:block;
+  background:#000;
+}
+
+
 /* ── VIDEO INTEGRADO ── */
 .video-container{
   display:none;border-radius:16px;overflow:hidden;
@@ -266,7 +280,7 @@ audio{display:none;}
     <div class="artwork" style="width:100%;aspect-ratio:1/1;max-height:150px;margin-bottom:.4rem;" id="art-p">
       <div class="artwork-inner" id="art-inner-p"><img src="https://tawradio.github.io/sonoplayer-drive/sonoplayer-logo.png" style="width:60%;height:auto;opacity:.1;position:relative;" alt=""/></div>
       <img id="img-p" src="" alt=""/>
-      <div id="video-wrap-p" style="display:none;position:absolute;inset:0;background:#000;border-radius:16px;overflow:hidden;">
+      <div id="video-wrap-p" style="display:none;position:absolute;inset:0;background:#000;overflow:hidden;border-radius:16px;">
         <video id="videoPlayer" loop playsinline style="width:100%;height:100%;object-fit:contain;"></video>
         <div style="position:absolute;bottom:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:.4rem .6rem;background:rgba(0,0,0,.7);">
           <div class="video-ctrl-btn" onclick="toggleVideo()">⏯</div>
