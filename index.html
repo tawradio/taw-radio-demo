@@ -423,7 +423,7 @@ var currentVideo=0;
 
 function loadVideoFiles(cliente){
   // URL directa del MP4
-  videoFiles=['http://178.105.91.229:8080/multimedia/'+cliente+'/Sonoplayer%20V1.mp4'];
+  videoFiles=['http://media.stumusicpro.cl:8080/multimedia/'+cliente+'/Sonoplayer%20V1.mp4'];
 }
 
 function openVideo(cliente){
@@ -489,4 +489,35 @@ function startProgress(mode){
     var t1=document.getElementById('pt1-'+mode);if(t1) t1.textContent=fmtTime(elapsed);
     var t2=document.getElementById('pt2-'+mode);if(t2) t2.textContent=fmtTime(trackDuration);
     if(elapsed>=trackDuration) elapsed=0;
-  },
+  },1000);
+}
+function fmtTime(s){var m=Math.floor(s/60);return m+':'+String(s%60).padStart(2,'0');}
+
+function fetchTrack(mode){
+  if(!current) return;
+  var mount=current.dataset.stream.split('/').pop();
+  var img=document.getElementById('img-'+mode);
+  if(img){img.src='https://stream.stumusicpro.cl/covers/'+mount+'.jpg?t='+Date.now();img.style.display='block';
+    var inner=document.querySelector('#art-'+mode+' .artwork-inner');if(inner) inner.style.display='none';}
+  fetch('https://stream.stumusicpro.cl/status-json.xsl')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d||!d.icestats||!d.icestats.source) return;
+      var sources=d.icestats.source;if(!Array.isArray(sources)) sources=[sources];
+      for(var i=0;i<sources.length;i++){
+        if((sources[i].listenurl||'').indexOf('/'+mount)>-1){
+          var title=(sources[i].title||'Sonando ahora').replace(/^[Ee]dmundodelpino\s*-\s*/,'').replace(/\.mp3$/i,'').trim();
+          var tn=document.getElementById('tname-'+mode);
+          if(tn&&tn.textContent!==title){tn.textContent=title;elapsed=0;
+            if(img) img.src='https://stream.stumusicpro.cl/covers/'+mount+'.jpg?t='+Date.now();}
+          break;
+        }
+      }
+    }).catch(function(){});
+}
+
+function sel(el,mode){
+  if(el.classList.contains('locked')) return;
+  document.querySelectorAll('.btn').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active');current=el;currentMode=mode;
+  var ml=document.getElementById
