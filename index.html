@@ -261,21 +261,19 @@ audio{display:none;}
     </div>
   </header>
 
-  <!-- VIDEO INTEGRADO -->
-  <div class="video-container" id="videoContainer">
-    <video id="videoPlayer" loop playsinline></video>
-    <div class="video-controls">
-      <div class="video-ctrl-btn" onclick="toggleVideo()">⏯</div>
-      <div class="video-title" id="videoTitle">Multimedia</div>
-      <div class="video-ctrl-btn" onclick="closeVideo()">✕</div>
-    </div>
-  </div>
-
   <!-- PORTRAIT -->
   <div class="portrait-only">
     <div class="artwork" style="width:100%;aspect-ratio:1/1;max-height:150px;margin-bottom:.4rem;" id="art-p">
-      <div class="artwork-inner"><img src="https://tawradio.github.io/sonoplayer-drive/sonoplayer-logo.png" style="width:60%;height:auto;opacity:.1;position:relative;" alt=""/></div>
+      <div class="artwork-inner" id="art-inner-p"><img src="https://tawradio.github.io/sonoplayer-drive/sonoplayer-logo.png" style="width:60%;height:auto;opacity:.1;position:relative;" alt=""/></div>
       <img id="img-p" src="" alt=""/>
+      <div id="video-wrap-p" style="display:none;position:absolute;inset:0;background:#000;border-radius:16px;overflow:hidden;">
+        <video id="videoPlayer" loop playsinline style="width:100%;height:100%;object-fit:contain;"></video>
+        <div style="position:absolute;bottom:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:.4rem .6rem;background:rgba(0,0,0,.7);">
+          <div class="video-ctrl-btn" onclick="toggleVideo()">⏯</div>
+          <div style="font-family:monospace;font-size:.45rem;color:rgba(255,255,255,.5);">MULTIMEDIA</div>
+          <div class="video-ctrl-btn" onclick="closeVideo()">✕</div>
+        </div>
+      </div>
     </div>
     <div class="vis" id="vis-p" style="height:14px;margin-bottom:.4rem;">
       <div class="vb"></div><div class="vb"></div><div class="vb"></div>
@@ -352,8 +350,16 @@ audio{display:none;}
     </div>
     <div class="center">
       <div class="artwork" id="art-l" style="flex:1;min-height:0;aspect-ratio:unset;">
-        <div class="artwork-inner"><img src="https://tawradio.github.io/sonoplayer-drive/sonoplayer-logo.png" style="width:70%;height:auto;opacity:.1;position:relative;" alt=""/></div>
+        <div class="artwork-inner" id="art-inner-l"><img src="https://tawradio.github.io/sonoplayer-drive/sonoplayer-logo.png" style="width:70%;height:auto;opacity:.1;position:relative;" alt=""/></div>
         <img id="img-l" src="" alt=""/>
+        <div id="video-wrap-l" style="display:none;position:absolute;inset:0;background:#000;overflow:hidden;">
+          <video id="videoPlayerL" loop playsinline style="width:100%;height:100%;object-fit:contain;"></video>
+          <div style="position:absolute;bottom:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:.4rem .6rem;background:rgba(0,0,0,.7);">
+            <div class="video-ctrl-btn" onclick="toggleVideo()">⏯</div>
+            <div style="font-family:monospace;font-size:.45rem;color:rgba(255,255,255,.5);">MULTIMEDIA</div>
+            <div class="video-ctrl-btn" onclick="closeVideo()">✕</div>
+          </div>
+        </div>
         <div style="position:absolute;bottom:10px;left:0;right:0;z-index:3;">
           <div class="vis" id="vis-l" style="height:22px;">
             <div class="vb"></div><div class="vb"></div><div class="vb"></div>
@@ -439,32 +445,47 @@ function loadVideoFiles(cliente){
 function openVideo(cliente){
   loadVideoFiles(cliente);
   if(!videoFiles.length) return;
-  var vp=document.getElementById('videoPlayer');
-  var vc=document.getElementById('videoContainer');
   // Pausar audio MP3
   player.pause();
   setP(false,currentMode);
-  vp.src=videoFiles[currentVideo];
-  vp.play();
+  // Mostrar video en el artwork según modo
+  var isPortrait=window.innerWidth<=540&&window.innerHeight>window.innerWidth;
+  if(isPortrait){
+    var vp=document.getElementById('videoPlayer');
+    var vw=document.getElementById('video-wrap-p');
+    var img=document.getElementById('img-p');
+    if(img) img.style.display='none';
+    vp.src=videoFiles[0];
+    vp.play();
+    vw.style.display='block';
+  } else {
+    var vp=document.getElementById('videoPlayerL');
+    var vw=document.getElementById('video-wrap-l');
+    var img=document.getElementById('img-l');
+    if(img) img.style.display='none';
+    vp.src=videoFiles[0];
+    vp.play();
+    vw.style.display='block';
+  }
   videoPlaying=true;
-  vc.classList.add('active');
-  document.getElementById('videoTitle').textContent='Multimedia · '+cliente;
-  // Scroll al video
-  vc.scrollIntoView({behavior:'smooth',block:'center'});
 }
 
 function toggleVideo(){
-  var vp=document.getElementById('videoPlayer');
+  var isPortrait=window.innerWidth<=540&&window.innerHeight>window.innerWidth;
+  var vp=document.getElementById(isPortrait?'videoPlayer':'videoPlayerL');
   if(videoPlaying){vp.pause();videoPlaying=false;}
   else{vp.play();videoPlaying=true;}
 }
 
 function closeVideo(){
-  var vc=document.getElementById('videoContainer');
   var vp=document.getElementById('videoPlayer');
-  vc.classList.remove('active');
-  vp.pause();
-  vp.src='';
+  var vpL=document.getElementById('videoPlayerL');
+  var vwP=document.getElementById('video-wrap-p');
+  var vwL=document.getElementById('video-wrap-l');
+  if(vp){vp.pause();vp.src='';}
+  if(vpL){vpL.pause();vpL.src='';}
+  if(vwP) vwP.style.display='none';
+  if(vwL) vwL.style.display='none';
   videoPlaying=false;
 }
 
