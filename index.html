@@ -577,8 +577,15 @@ function fetchTrack(mode){
   if(!current) return;
   var mount=current.dataset.stream.split('/').pop();
   var img=document.getElementById('img-'+mode);
-  if(img){img.src='https://stream.stumusicpro.cl/covers/'+mount+'.jpg?t='+Date.now();img.style.display='block';
-    var inner=document.querySelector('#art-'+mode+' .artwork-inner');if(inner) inner.style.display='none';}
+  // Siempre actualizar carátula con timestamp fresco
+  var coverUrl='https://stream.stumusicpro.cl/covers/'+mount+'.jpg?t='+Date.now();
+  if(img){
+    var newImg=new Image();
+    newImg.onload=function(){img.src=coverUrl;img.style.display='block';};
+    newImg.src=coverUrl;
+    var inner=document.querySelector('#art-'+mode+' .artwork-inner');
+    if(inner) inner.style.display='none';
+  }
   fetch('https://stream.stumusicpro.cl/status-json.xsl')
     .then(function(r){return r.json();})
     .then(function(d){
@@ -588,8 +595,7 @@ function fetchTrack(mode){
         if((sources[i].listenurl||'').indexOf('/'+mount)>-1){
           var title=(sources[i].title||'Sonando ahora').replace(/^[Ee]dmundodelpino\s*-\s*/,'').replace(/\.mp3$/i,'').trim();
           var tn=document.getElementById('tname-'+mode);
-          if(tn&&tn.textContent!==title){tn.textContent=title;elapsed=0;
-            if(img) img.src='https://stream.stumusicpro.cl/covers/'+mount+'.jpg?t='+Date.now();}
+          if(tn) tn.textContent=title;
           break;
         }
       }
@@ -608,7 +614,7 @@ function sel(el,mode){
   player.play().then(function(){setP(true,mode);}).catch(function(){setP(true,mode);});
   fetchTrack(mode);startProgress(mode);
   if(tid) clearInterval(tid);
-  tid=setInterval(function(){fetchTrack(mode);},10000);
+  tid=setInterval(function(){fetchTrack(mode);},8000);
   // Si es Multimedia abrir video
   if(el.classList.contains('multi')){
     setTimeout(function(){openVideo(cliente);},500);
