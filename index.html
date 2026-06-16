@@ -207,6 +207,28 @@ body::before{content:'';position:fixed;top:-10%;left:50%;transform:translateX(-5
   .play-main{width:52px;height:52px;font-size:1.35rem;}
 }
 audio{display:none;}
+
+/* ── VIDEO OVERLAY ── */
+.video-overlay{
+  position:fixed;inset:0;background:#000;z-index:2000;
+  display:none;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+.video-overlay.active{display:flex;}
+.video-overlay video{width:100%;height:100%;object-fit:contain;}
+.video-close{
+  position:absolute;top:16px;right:16px;
+  font-size:2rem;color:rgba(255,255,255,.6);
+  z-index:2001;cursor:pointer;
+  text-shadow:0 0 10px rgba(0,0,0,.8);
+}
+.video-hint{
+  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  font-family:'Orbitron',monospace;font-size:.6rem;
+  color:rgba(255,255,255,.4);letter-spacing:.1em;
+  text-align:center;pointer-events:none;
+}
+
 </style>
 </head>
 <body>
@@ -376,6 +398,14 @@ audio{display:none;}
 
 </div>
 
+
+<!-- VIDEO OVERLAY -->
+<div class="video-overlay" id="videoOverlay" onclick="closeVideo()">
+  <div class="video-close" onclick="closeVideo()">✕</div>
+  <video id="videoPlayer" autoplay loop playsinline></video>
+  <div class="video-hint">Toca la pantalla para volver al player</div>
+</div>
+
 <audio id="player" preload="none"></audio>
 <script>
 // Leer cliente de URL
@@ -386,6 +416,41 @@ var btnMP=document.getElementById('btn-multi-p');
 var btnML=document.getElementById('btn-multi-l');
 if(btnMP) btnMP.dataset.stream=multiStream;
 if(btnML) btnML.dataset.stream=multiStream;
+
+
+var videoFiles=[];
+var currentVideo=0;
+
+function loadVideoFiles(cliente){
+  // URL directa del MP4
+  videoFiles=['http://178.105.91.229:8080/multimedia/'+cliente+'/Sonoplayer%20V1.mp4'];
+}
+
+function openVideo(cliente){
+  loadVideoFiles(cliente);
+  if(!videoFiles.length) return;
+  var vp=document.getElementById('videoPlayer');
+  var vo=document.getElementById('videoOverlay');
+  vp.src=videoFiles[currentVideo];
+  vo.classList.add('active');
+  // Pantalla completa
+  if(vo.requestFullscreen) vo.requestFullscreen();
+  else if(vo.webkitRequestFullscreen) vo.webkitRequestFullscreen();
+}
+
+function closeVideo(){
+  var vo=document.getElementById('videoOverlay');
+  var vp=document.getElementById('videoPlayer');
+  vo.classList.remove('active');
+  vp.pause();
+  vp.src='';
+  if(document.exitFullscreen) document.exitFullscreen();
+  else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+}
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape') closeVideo();
+});
 
 var player=document.getElementById('player');
 var playing=false;var current=null;var currentMode='l';
@@ -424,96 +489,4 @@ function startProgress(mode){
     var t1=document.getElementById('pt1-'+mode);if(t1) t1.textContent=fmtTime(elapsed);
     var t2=document.getElementById('pt2-'+mode);if(t2) t2.textContent=fmtTime(trackDuration);
     if(elapsed>=trackDuration) elapsed=0;
-  },1000);
-}
-function fmtTime(s){var m=Math.floor(s/60);return m+':'+String(s%60).padStart(2,'0');}
-
-function fetchTrack(mode){
-  if(!current) return;
-  var mount=current.dataset.stream.split('/').pop();
-  var img=document.getElementById('img-'+mode);
-  if(img){img.src='https://stream.stumusicpro.cl/covers/'+mount+'.jpg?t='+Date.now();img.style.display='block';
-    var inner=document.querySelector('#art-'+mode+' .artwork-inner');if(inner) inner.style.display='none';}
-  fetch('https://stream.stumusicpro.cl/status-json.xsl')
-    .then(function(r){return r.json();})
-    .then(function(d){
-      if(!d||!d.icestats||!d.icestats.source) return;
-      var sources=d.icestats.source;if(!Array.isArray(sources)) sources=[sources];
-      for(var i=0;i<sources.length;i++){
-        if((sources[i].listenurl||'').indexOf('/'+mount)>-1){
-          var title=(sources[i].title||'Sonando ahora').replace(/^[Ee]dmundodelpino\s*-\s*/,'').replace(/\.mp3$/i,'').trim();
-          var tn=document.getElementById('tname-'+mode);
-          if(tn&&tn.textContent!==title){tn.textContent=title;elapsed=0;
-            if(img) img.src='https://stream.stumusicpro.cl/covers/'+mount+'.jpg?t='+Date.now();}
-          break;
-        }
-      }
-    }).catch(function(){});
-}
-
-function sel(el,mode){
-  if(el.classList.contains('locked')) return;
-  document.querySelectorAll('.btn').forEach(function(b){b.classList.remove('active');});
-  el.classList.add('active');current=el;currentMode=mode;
-  var ml=document.getElementById('master-'+mode);
-  document.getElementById('tname-'+mode).textContent='Cargando...';
-  document.getElementById('tgenre-'+mode).textContent=el.dataset.genre;
-  if(ml) ml.classList.add('live');
-  player.src=el.dataset.stream;
-  player.play().then(function(){setP(true,mode);}).catch(function(){setP(true,mode);});
-  fetchTrack(mode);startProgress(mode);
-  if(tid) clearInterval(tid);
-  tid=setInterval(function(){fetchTrack(mode);},10000);
-}
-
-function togglePlay(mode){
-  if(!current){var f=document.querySelector('.btn:not(.locked)');if(f) sel(f,mode);return;}
-  if(playing){player.pause();setP(false,currentMode);}
-  else{player.play().catch(function(){});setP(true,currentMode);}
-}
-
-function setP(s,mode){
-  playing=s;
-  var pb=document.getElementById('play-'+mode);if(pb) pb.textContent=s?'⏸':'▶';
-  var v=document.getElementById('vis-'+mode);if(v) v.classList.toggle('on',s);
-  if(!s&&progInterval){clearInterval(progInterval);progInterval=null;}
-  else if(s&&!progInterval) startProgress(mode);
-}
-
-
-var channelList=[];
-var channelIndex=0;
-
-function buildChannelList(){
-  channelList=[];
-  document.querySelectorAll('.btn:not(.locked)').forEach(function(b){
-    if(b.dataset.stream) channelList.push(b);
-  });
-}
-
-function prevTrack(){
-  buildChannelList();
-  if(!channelList.length) return;
-  if(current){
-    var idx=channelList.indexOf(current);
-    channelIndex=(idx-1+channelList.length)%channelList.length;
-  } else { channelIndex=channelList.length-1; }
-  sel(channelList[channelIndex],currentMode);
-}
-
-function nextTrack(){
-  buildChannelList();
-  if(!channelList.length) return;
-  if(current){
-    var idx=channelList.indexOf(current);
-    channelIndex=(idx+1)%channelList.length;
-  } else { channelIndex=0; }
-  sel(channelList[channelIndex],currentMode);
-}
-
-document.querySelectorAll('.btn:not(.locked)').forEach(function(el){
-  el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ') sel(el,currentMode);});
-});
-</script>
-</body>
-</html>
+  },
