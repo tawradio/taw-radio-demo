@@ -423,7 +423,7 @@ var currentVideo=0;
 
 function loadVideoFiles(cliente){
   // URL directa del MP4
-  videoFiles=['http://media.stumusicpro.cl:8080/multimedia/'+cliente+'/Sonoplayer%20V1.mp4'];
+  videoFiles=['https://media.stumusicpro.cl/multimedia/'+cliente+'/Sonoplayer%20V1.mp4'];
 }
 
 function openVideo(cliente){
@@ -520,4 +520,69 @@ function sel(el,mode){
   if(el.classList.contains('locked')) return;
   document.querySelectorAll('.btn').forEach(function(b){b.classList.remove('active');});
   el.classList.add('active');current=el;currentMode=mode;
-  var ml=document.getElementById
+  var ml=document.getElementById('master-'+mode);
+  document.getElementById('tname-'+mode).textContent='Cargando...';
+  document.getElementById('tgenre-'+mode).textContent=el.dataset.genre;
+  if(ml) ml.classList.add('live');
+  player.src=el.dataset.stream;
+  player.play().then(function(){setP(true,mode);}).catch(function(){setP(true,mode);});
+  fetchTrack(mode);startProgress(mode);
+  if(tid) clearInterval(tid);
+  tid=setInterval(function(){fetchTrack(mode);},10000);
+  // Si es Multimedia abrir video
+  if(el.classList.contains('multi')){
+    setTimeout(function(){openVideo(cliente);},500);
+  }
+}
+
+function togglePlay(mode){
+  if(!current){var f=document.querySelector('.btn:not(.locked)');if(f) sel(f,mode);return;}
+  if(playing){player.pause();setP(false,currentMode);}
+  else{player.play().catch(function(){});setP(true,currentMode);}
+}
+
+function setP(s,mode){
+  playing=s;
+  var pb=document.getElementById('play-'+mode);if(pb) pb.textContent=s?'⏸':'▶';
+  var v=document.getElementById('vis-'+mode);if(v) v.classList.toggle('on',s);
+  if(!s&&progInterval){clearInterval(progInterval);progInterval=null;}
+  else if(s&&!progInterval) startProgress(mode);
+}
+
+
+var channelList=[];
+var channelIndex=0;
+
+function buildChannelList(){
+  channelList=[];
+  document.querySelectorAll('.btn:not(.locked)').forEach(function(b){
+    if(b.dataset.stream) channelList.push(b);
+  });
+}
+
+function prevTrack(){
+  buildChannelList();
+  if(!channelList.length) return;
+  if(current){
+    var idx=channelList.indexOf(current);
+    channelIndex=(idx-1+channelList.length)%channelList.length;
+  } else { channelIndex=channelList.length-1; }
+  sel(channelList[channelIndex],currentMode);
+}
+
+function nextTrack(){
+  buildChannelList();
+  if(!channelList.length) return;
+  if(current){
+    var idx=channelList.indexOf(current);
+    channelIndex=(idx+1)%channelList.length;
+  } else { channelIndex=0; }
+  sel(channelList[channelIndex],currentMode);
+}
+
+document.querySelectorAll('.btn:not(.locked)').forEach(function(el){
+  el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ') sel(el,currentMode);});
+});
+</script>
+</body>
+</html>
