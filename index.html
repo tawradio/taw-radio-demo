@@ -208,25 +208,31 @@ body::before{content:'';position:fixed;top:-10%;left:50%;transform:translateX(-5
 }
 audio{display:none;}
 
-/* ── VIDEO OVERLAY ── */
-.video-overlay{
-  position:fixed;inset:0;background:#000;z-index:2000;
-  display:none;align-items:center;justify-content:center;
-  cursor:pointer;
+/* ── VIDEO INTEGRADO ── */
+.video-container{
+  display:none;border-radius:16px;overflow:hidden;
+  border:1px solid rgba(0,200,232,.3);
+  background:#000;position:relative;
 }
-.video-overlay.active{display:flex;}
-.video-overlay video{width:100%;height:100%;object-fit:contain;}
-.video-close{
-  position:absolute;top:16px;right:16px;
-  font-size:2rem;color:rgba(255,255,255,.6);
-  z-index:2001;cursor:pointer;
-  text-shadow:0 0 10px rgba(0,0,0,.8);
+.video-container.active{display:block;}
+.video-container video{width:100%;display:block;border-radius:16px;}
+.video-controls{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.5rem .75rem;background:rgba(0,0,0,.6);
+  border-top:1px solid rgba(255,255,255,.1);
 }
-.video-hint{
-  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
-  font-family:'Orbitron',monospace;font-size:.6rem;
-  color:rgba(255,255,255,.4);letter-spacing:.1em;
-  text-align:center;pointer-events:none;
+.video-ctrl-btn{
+  border-radius:50%;border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);
+  cursor:pointer;width:32px;height:32px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.9rem;transition:all .2s;
+}
+.video-ctrl-btn:hover{background:rgba(255,255,255,.15);color:#fff;}
+.video-title{
+  font-family:'Orbitron',monospace;font-size:.5rem;
+  color:rgba(255,255,255,.5);letter-spacing:.1em;
+  flex:1;text-align:center;
 }
 
 </style>
@@ -254,6 +260,16 @@ audio{display:none;}
       <div class="deco-r"></div>
     </div>
   </header>
+
+  <!-- VIDEO INTEGRADO -->
+  <div class="video-container" id="videoContainer">
+    <video id="videoPlayer" loop playsinline></video>
+    <div class="video-controls">
+      <div class="video-ctrl-btn" onclick="toggleVideo()">⏯</div>
+      <div class="video-title" id="videoTitle">Multimedia</div>
+      <div class="video-ctrl-btn" onclick="closeVideo()">✕</div>
+    </div>
+  </div>
 
   <!-- PORTRAIT -->
   <div class="portrait-only">
@@ -399,12 +415,6 @@ audio{display:none;}
 </div>
 
 
-<!-- VIDEO OVERLAY -->
-<div class="video-overlay" id="videoOverlay" onclick="closeVideo()">
-  <div class="video-close" onclick="closeVideo()">✕</div>
-  <video id="videoPlayer" autoplay loop playsinline></video>
-  <div class="video-hint">Toca la pantalla para volver al player</div>
-</div>
 
 <audio id="player" preload="none"></audio>
 <script>
@@ -420,9 +430,9 @@ if(btnML) btnML.dataset.stream=multiStream;
 
 var videoFiles=[];
 var currentVideo=0;
+var videoPlaying=false;
 
 function loadVideoFiles(cliente){
-  // URL directa del MP4
   videoFiles=['https://media.stumusicpro.cl/multimedia/'+cliente+'/Sonoplayer%20V1.mp4'];
 }
 
@@ -430,22 +440,32 @@ function openVideo(cliente){
   loadVideoFiles(cliente);
   if(!videoFiles.length) return;
   var vp=document.getElementById('videoPlayer');
-  var vo=document.getElementById('videoOverlay');
+  var vc=document.getElementById('videoContainer');
+  // Pausar audio MP3
+  player.pause();
+  setP(false,currentMode);
   vp.src=videoFiles[currentVideo];
-  vo.classList.add('active');
-  // Pantalla completa
-  if(vo.requestFullscreen) vo.requestFullscreen();
-  else if(vo.webkitRequestFullscreen) vo.webkitRequestFullscreen();
+  vp.play();
+  videoPlaying=true;
+  vc.classList.add('active');
+  document.getElementById('videoTitle').textContent='Multimedia · '+cliente;
+  // Scroll al video
+  vc.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function toggleVideo(){
+  var vp=document.getElementById('videoPlayer');
+  if(videoPlaying){vp.pause();videoPlaying=false;}
+  else{vp.play();videoPlaying=true;}
 }
 
 function closeVideo(){
-  var vo=document.getElementById('videoOverlay');
+  var vc=document.getElementById('videoContainer');
   var vp=document.getElementById('videoPlayer');
-  vo.classList.remove('active');
+  vc.classList.remove('active');
   vp.pause();
   vp.src='';
-  if(document.exitFullscreen) document.exitFullscreen();
-  else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+  videoPlaying=false;
 }
 
 document.addEventListener('keydown',function(e){
