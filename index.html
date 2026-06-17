@@ -118,7 +118,7 @@ body::before{content:'';position:fixed;top:-10%;left:50%;transform:translateX(-5
 .progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--cyan),rgba(0,200,232,.6));width:0%;transition:width .5s linear;position:relative;}
 .progress-fill::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);}
 .progress-time{display:flex;justify-content:space-between;margin-top:.2rem;}
-.pt{font-family:'Orbitron',monospace;font-size:.42rem;color:var(--dim);}
+.pt{font-family:'Orbitron',monospace;font-size:.48rem;color:var(--silver);opacity:.85;font-weight:500;}
 .controls{display:flex;align-items:center;gap:.6rem;flex-shrink:0;}
 .ctrl-btn{border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:rgba(255,255,255,.35);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;}
 .ctrl-btn:hover:not(.off){border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8);}
@@ -670,3 +670,4 @@ document.querySelectorAll('.btn:not(.locked)').forEach(function(el){
 </script>
 </body>
 </html>
+
