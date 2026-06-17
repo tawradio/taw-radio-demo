@@ -321,9 +321,9 @@ audio{display:none;}
           <div class="progress-time"><span class="pt" id="pt1-p">0:00</span><span class="pt" id="pt2-p">--:--</span></div></div>
         </div>
         <div class="controls" style="gap:.5rem;">
-          <div class="ctrl-btn" onclick="prevTrack()" style="width:30px;height:30px;font-size:.75rem;">⏮</div>
-          <div class="play-main" id="play-p" onclick="togglePlay('p')" style="width:44px;height:44px;font-size:1.15rem;">▶</div>
-          <div class="ctrl-btn" onclick="nextTrack()" style="width:30px;height:30px;font-size:.75rem;">⏭</div>
+          <div class="ctrl-btn off" id="prev-p" style="width:30px;height:30px;font-size:.75rem;">⏮</div>
+          <div class="play-main" id="play-p" style="width:44px;height:44px;font-size:1.15rem;cursor:default;opacity:.6;">▶</div>
+          <div class="ctrl-btn off" id="next-p" style="width:30px;height:30px;font-size:.75rem;">⏭</div>
         </div>
       </div>
     </div>
@@ -426,9 +426,9 @@ audio{display:none;}
         <div class="progress-time"><span class="pt" id="pt1-l">0:00</span><span class="pt" id="pt2-l">--:--</span></div></div>
       </div>
       <div class="controls" style="gap:.6rem;">
-        <div class="ctrl-btn" onclick="prevTrack()" style="width:32px;height:32px;font-size:.8rem;">⏮</div>
-        <div class="play-main" id="play-l" onclick="togglePlay('l')" style="width:48px;height:48px;font-size:1.25rem;">▶</div>
-        <div class="ctrl-btn" onclick="nextTrack()" style="width:32px;height:32px;font-size:.8rem;">⏭</div>
+        <div class="ctrl-btn off" id="prev-l" style="width:32px;height:32px;font-size:.8rem;">⏮</div>
+        <div class="play-main" id="play-l" style="width:48px;height:48px;font-size:1.25rem;cursor:default;opacity:.6;">▶</div>
+        <div class="ctrl-btn off" id="next-l" style="width:32px;height:32px;font-size:.8rem;">⏭</div>
       </div>
     </div>
   </div>
@@ -475,7 +475,8 @@ function openVideo(cliente){
   if(!videoFiles.length) return;
   // Pausar audio MP3
   player.pause();
-  setP(false,currentMode);
+  // Activar controles multimedia
+  activateMultimediaControls(true);
   var isPortrait=window.innerWidth<=540&&window.innerHeight>window.innerWidth;
   if(isPortrait){
     var vp=document.getElementById('videoPlayer');
@@ -517,12 +518,12 @@ function closeVideo(){
   if(vpL){vpL.pause();vpL.src='';}
   if(vwP) vwP.style.display='none';
   if(vwL) vwL.style.display='none';
-  // Restaurar artwork
   var artP=document.getElementById('art-p');
   var artL=document.getElementById('art-l');
   if(artP) artP.style.background='';
   if(artL) artL.style.background='';
   videoPlaying=false;
+  activateMultimediaControls(false);
 }
 
 document.addEventListener('keydown',function(e){
@@ -630,7 +631,22 @@ function setP(s,mode){
   var pb=document.getElementById('play-'+mode);if(pb) pb.textContent=s?'⏸':'▶';
   var v=document.getElementById('vis-'+mode);if(v) v.classList.toggle('on',s);
   if(!s&&progInterval){clearInterval(progInterval);progInterval=null;}
-  else if(s&&!progInterval) startProgress(mode);
+  else if(s&&!progInterval) resumeProgress(mode);
+}
+
+function resumeProgress(mode){
+  if(progInterval) clearInterval(progInterval);
+  progInterval=setInterval(function(){
+    elapsed++;
+    var pct=Math.min((elapsed/trackDuration)*100,100);
+    var p=document.getElementById('prog-'+mode);
+    if(p) p.style.width=pct+'%';
+    var t1=document.getElementById('pt1-'+mode);
+    if(t1) t1.textContent=fmtTime(elapsed);
+    var t2=document.getElementById('pt2-'+mode);
+    if(t2) t2.textContent=fmtTime(trackDuration);
+    if(elapsed>=trackDuration) elapsed=0;
+  },1000);
 }
 
 
@@ -664,10 +680,36 @@ function nextTrack(){
   sel(channelList[channelIndex],currentMode);
 }
 
+
+function activateMultimediaControls(active){
+  // Play/pause button
+  var playP=document.getElementById('play-p');
+  var playL=document.getElementById('play-l');
+  var prevP=document.getElementById('prev-p');
+  var prevL=document.getElementById('prev-l');
+  var nextP=document.getElementById('next-p');
+  var nextL=document.getElementById('next-l');
+
+  if(active){
+    if(playP){playP.style.cursor='pointer';playP.style.opacity='1';playP.onclick=function(){toggleVideo();};}
+    if(playL){playL.style.cursor='pointer';playL.style.opacity='1';playL.onclick=function(){toggleVideo();};}
+    if(prevP){prevP.classList.remove('off');prevP.onclick=function(){closeVideo();};}
+    if(prevL){prevL.classList.remove('off');prevL.onclick=function(){closeVideo();};}
+    if(nextP){nextP.classList.remove('off');nextP.onclick=function(){closeVideo();};}
+    if(nextL){nextL.classList.remove('off');nextL.onclick=function(){closeVideo();};}
+  } else {
+    if(playP){playP.style.cursor='default';playP.style.opacity='.6';playP.onclick=null;playP.textContent='▶';}
+    if(playL){playL.style.cursor='default';playL.style.opacity='.6';playL.onclick=null;playL.textContent='▶';}
+    if(prevP){prevP.classList.add('off');prevP.onclick=null;}
+    if(prevL){prevL.classList.add('off');prevL.onclick=null;}
+    if(nextP){nextP.classList.add('off');nextP.onclick=null;}
+    if(nextL){nextL.classList.add('off');nextL.onclick=null;}
+  }
+}
+
 document.querySelectorAll('.btn:not(.locked)').forEach(function(el){
   el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ') sel(el,currentMode);});
 });
 </script>
 </body>
 </html>
-
