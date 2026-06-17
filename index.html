@@ -611,7 +611,18 @@ function sel(el,mode){
   if(ml) ml.classList.add('live');
   player.src=el.dataset.stream;
   player.play().then(function(){setP(true,mode);}).catch(function(){setP(true,mode);});
-  fetchTrack(mode);startProgress(mode);
+  var mount=el.dataset.stream.split('/').pop();
+  // Leer meta.json primero para obtener duración real
+  fetch('https://stream.stumusicpro.cl/covers/meta.json?t='+Date.now())
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d&&d[mount]){
+        if(d[mount].duration>0) trackDuration=d[mount].duration;
+        if(d[mount].title) document.getElementById('tname-'+mode).textContent=d[mount].title;
+      }
+      startProgress(mode);
+    }).catch(function(){startProgress(mode);});
+  fetchTrack(mode);
   if(tid) clearInterval(tid);
   tid=setInterval(function(){fetchTrack(mode);},8000);
   // Si es Multimedia abrir video
