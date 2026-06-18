@@ -575,11 +575,13 @@ function startProgressFrom(mode, fromElapsed){
 }
 function fmtTime(s){var m=Math.floor(s/60);return m+':'+String(s%60).padStart(2,'0');}
 
+var lastTitle={};
+
 function fetchTrack(mode){
   if(!current) return;
   var mount=current.dataset.stream.split('/').pop();
   var img=document.getElementById('img-'+mode);
-  // Siempre actualizar carátula con timestamp fresco
+  // Actualizar caratula
   var coverUrl='https://stream.stumusicpro.cl/covers/'+mount+'.jpg?t='+Date.now();
   if(img){
     var newImg=new Image();
@@ -588,18 +590,29 @@ function fetchTrack(mode){
     var inner=document.querySelector('#art-'+mode+' .artwork-inner');
     if(inner) inner.style.display='none';
   }
-  fetch('https://stream.stumusicpro.cl/status-json.xsl')
+  // Leer meta.json para titulo, duracion y started
+  fetch('https://stream.stumusicpro.cl/covers/meta.json?t='+Date.now())
     .then(function(r){return r.json();})
     .then(function(d){
-      if(!d||!d.icestats||!d.icestats.source) return;
-      var sources=d.icestats.source;if(!Array.isArray(sources)) sources=[sources];
-      for(var i=0;i<sources.length;i++){
-        if((sources[i].listenurl||'').indexOf('/'+mount)>-1){
-          var title=(sources[i].title||'Sonando ahora').replace(/^[Ee]dmundodelpino\s*-\s*/,'').replace(/\.mp3$/i,'').trim();
-          var tn=document.getElementById('tname-'+mode);
-          if(tn) tn.textContent=title;
-          break;
+      if(!d||!d[mount]) return;
+      var info=d[mount];
+      var newTitle=info.title||'Sonando ahora';
+      var tn=document.getElementById('tname-'+mode);
+      // Si el titulo cambio actualizar duracion y reiniciar contador
+      if(newTitle!==lastTitle[mount]){
+        lastTitle[mount]=newTitle;
+        if(tn) tn.textContent=newTitle;
+        if(info.duration&&info.duration>0) trackDuration=info.duration;
+        var fromElapsed=0;
+        if(info.started){
+          var nowSec=Math.floor(Date.now()/1000);
+          var diff=nowSec-info.started;
+          if(diff>0&&trackDuration>0) fromElapsed=diff%trackDuration;
         }
+        if(progInterval) clearInterval(progInterval);
+        progInterval=null;
+        elapsed=fromElapsed;
+        startProgressFrom(mode,fromElapsed);
       }
     }).catch(function(){});
 }
