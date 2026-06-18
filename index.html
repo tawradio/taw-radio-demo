@@ -559,8 +559,11 @@ function checkLayout(){
 var trackDuration=150;
 var trackMeta={};
 function startProgress(mode){
+  startProgressFrom(mode, 0);
+}
+function startProgressFrom(mode, fromElapsed){
   if(progInterval) clearInterval(progInterval);
-  elapsed=0;
+  elapsed = fromElapsed || 0;
   progInterval=setInterval(function(){
     elapsed++;
     var pct=Math.min((elapsed/trackDuration)*100,100);
