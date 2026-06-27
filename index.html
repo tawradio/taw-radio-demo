@@ -515,26 +515,40 @@ function toggleVideo(){
 }
 
 function closeVideo(){
-  // Detener video completamente - reemplazar elemento
+  // Crear nuevos elementos video para forzar detención total
   var vwP=document.getElementById('video-wrap-p');
   var vwL=document.getElementById('video-wrap-l');
-  
-  // Reemplazar elemento video para forzar detención
+
   var vp=document.getElementById('videoPlayer');
   if(vp){
     vp.pause();
+    vp.src='';
     vp.removeAttribute('src');
     vp.load();
-    vp.muted=true;
+    // Reemplazar el elemento completamente
+    var newVp=vp.cloneNode(false);
+    vp.parentNode.replaceChild(newVp,vp);
+    newVp.id='videoPlayer';
+    newVp.loop=true;
+    newVp.setAttribute('playsinline','');
+    newVp.style.cursor='pointer';
+    newVp.onclick=function(){toggleVideo();};
   }
   var vpL=document.getElementById('videoPlayerL');
   if(vpL){
     vpL.pause();
+    vpL.src='';
     vpL.removeAttribute('src');
     vpL.load();
-    vpL.muted=true;
+    var newVpL=vpL.cloneNode(false);
+    vpL.parentNode.replaceChild(newVpL,vpL);
+    newVpL.id='videoPlayerL';
+    newVpL.loop=true;
+    newVpL.setAttribute('playsinline','');
+    newVpL.style.cursor='pointer';
+    newVpL.onclick=function(){toggleVideo();};
   }
-  
+
   if(vwP) vwP.style.display='none';
   if(vwL) vwL.style.display='none';
   var artP=document.getElementById('art-p');
@@ -543,21 +557,16 @@ function closeVideo(){
   if(artL) artL.style.background='';
   videoPlaying=false;
   activateMultimediaControls(false);
-  
-  // Reactivar audio MP3
-  setTimeout(function(){
-    if(vp) vp.muted=false;
-    if(vpL) vpL.muted=false;
-    if(current && current.dataset.stream){
-      player.src=current.dataset.stream;
-      player.play().then(function(){
-        setP(true,currentMode);
-        fetchTrack(currentMode);
-      }).catch(function(){
-        setP(true,currentMode);
-      });
-    }
-  }, 300);
+
+  // Reactivar Mi Playlist si estaba activo antes
+  if(previousChannel && previousChannel.dataset.stream){
+    current=previousChannel;
+    player.src=previousChannel.dataset.stream;
+    player.play().then(function(){
+      setP(true,currentMode);
+      fetchTrack(currentMode);
+    }).catch(function(){setP(true,currentMode);});
+  }
 }
 
 document.addEventListener('keydown',function(e){
