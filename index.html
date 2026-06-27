@@ -524,6 +524,10 @@ function closeVideo(){
   if(artL) artL.style.background='';
   videoPlaying=false;
   activateMultimediaControls(false);
+  // Reactivar audio MP3
+  if(current){
+    player.play().then(function(){setP(true,currentMode);}).catch(function(){});
+  }
 }
 
 document.addEventListener('keydown',function(e){
