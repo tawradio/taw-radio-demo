@@ -515,13 +515,26 @@ function toggleVideo(){
 }
 
 function closeVideo(){
-  // Detener video completamente
-  var vp=document.getElementById('videoPlayer');
-  var vpL=document.getElementById('videoPlayerL');
+  // Detener video completamente - reemplazar elemento
   var vwP=document.getElementById('video-wrap-p');
   var vwL=document.getElementById('video-wrap-l');
-  if(vp){vp.pause();vp.src='';vp.load();}
-  if(vpL){vpL.pause();vpL.src='';vpL.load();}
+  
+  // Reemplazar elemento video para forzar detención
+  var vp=document.getElementById('videoPlayer');
+  if(vp){
+    vp.pause();
+    vp.removeAttribute('src');
+    vp.load();
+    vp.muted=true;
+  }
+  var vpL=document.getElementById('videoPlayerL');
+  if(vpL){
+    vpL.pause();
+    vpL.removeAttribute('src');
+    vpL.load();
+    vpL.muted=true;
+  }
+  
   if(vwP) vwP.style.display='none';
   if(vwL) vwL.style.display='none';
   var artP=document.getElementById('art-p');
@@ -530,16 +543,21 @@ function closeVideo(){
   if(artL) artL.style.background='';
   videoPlaying=false;
   activateMultimediaControls(false);
-  // Volver al canal Multimedia con audio MP3
-  if(current && current.dataset.stream){
-    player.src=current.dataset.stream;
-    player.play().then(function(){
-      setP(true,currentMode);
-      fetchTrack(currentMode);
-    }).catch(function(){
-      setP(true,currentMode);
-    });
-  }
+  
+  // Reactivar audio MP3
+  setTimeout(function(){
+    if(vp) vp.muted=false;
+    if(vpL) vpL.muted=false;
+    if(current && current.dataset.stream){
+      player.src=current.dataset.stream;
+      player.play().then(function(){
+        setP(true,currentMode);
+        fetchTrack(currentMode);
+      }).catch(function(){
+        setP(true,currentMode);
+      });
+    }
+  }, 300);
 }
 
 document.addEventListener('keydown',function(e){
