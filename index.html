@@ -470,11 +470,16 @@ function loadVideoFiles(cliente){
   videoFiles=['https://media.stumusicpro.cl/multimedia/'+cliente+'/Sonoplayer%20V1.mp4'];
 }
 
+var previousChannel = null;
+
 function openVideo(cliente){
   loadVideoFiles(cliente);
   if(!videoFiles.length) return;
+  // Guardar canal anterior
+  previousChannel = current;
   // Pausar audio MP3
   player.pause();
+  setP(false, currentMode);
   // Activar controles multimedia
   activateMultimediaControls(true);
   var isPortrait=window.innerWidth<=540&&window.innerHeight>window.innerWidth;
@@ -524,9 +529,21 @@ function closeVideo(){
   if(artL) artL.style.background='';
   videoPlaying=false;
   activateMultimediaControls(false);
-  // Reactivar audio MP3
-  if(current){
-    player.play().then(function(){setP(true,currentMode);}).catch(function(){});
+  // Volver al canal anterior si existe
+  if(previousChannel){
+    player.src=previousChannel.dataset.stream;
+    player.play().then(function(){
+      setP(true,currentMode);
+    }).catch(function(){
+      setP(true,currentMode);
+    });
+  } else if(current){
+    player.src=current.dataset.stream;
+    player.play().then(function(){
+      setP(true,currentMode);
+    }).catch(function(){
+      setP(true,currentMode);
+    });
   }
 }
 
