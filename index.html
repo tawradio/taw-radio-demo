@@ -343,10 +343,10 @@ audio{display:none;}
         <div class="btn-name" style="font-size:.56rem;">Tarde · Noche</div>
         <div class="btn-desc" style="font-size:.46rem;margin-top:.15rem;">TechnoTango · Reggaeton</div>
       </div>
-      <div class="btn ethnic" onclick="sel(this,'p')" data-stream="https://stream.stumusicpro.cl/tematica" data-genre="Temática · 80–110 BPM" role="button" tabindex="0">
-        <div class="btn-dot"></div><span class="btn-icon" style="font-size:1.35rem;margin-bottom:.3rem;">🌍</span>
-        <div class="btn-name" style="font-size:.56rem;">Temática</div>
-        <div class="btn-desc" style="font-size:.46rem;margin-top:.15rem;">Peruana · Árabe · más</div>
+      <div class="btn ethnic" id="btn-playlist-p" onclick="sel(this,'p')" data-stream="" data-genre="Mi Playlist · Tu música" role="button" tabindex="0">
+        <div class="btn-dot"></div><span class="btn-icon" style="font-size:1.35rem;margin-bottom:.3rem;">🎵</span>
+        <div class="btn-name" style="font-size:.56rem;">Mi Playlist</div>
+        <div class="btn-desc" style="font-size:.46rem;margin-top:.15rem;">Tu música · Personal</div>
       </div>
       <div class="btn drive" onclick="sel(this,'p')" data-stream="https://stream.stumusicpro.cl/drive" data-genre="Drive · 95–125 BPM" role="button" tabindex="0">
         <div class="btn-dot"></div><span class="btn-icon" style="font-size:1.35rem;margin-bottom:.3rem;">🚗</span>
@@ -398,10 +398,10 @@ audio{display:none;}
       </div>
     </div>
     <div class="col">
-      <div class="btn ethnic" onclick="sel(this,'l')" data-stream="https://stream.stumusicpro.cl/tematica" data-genre="Temática · 80–110 BPM" role="button" tabindex="0">
-        <div class="btn-dot"></div><span class="btn-icon" style="font-size:1.55rem;margin-bottom:.35rem;">🌍</span>
-        <div class="btn-name" style="font-size:.6rem;">Temática</div>
-        <div class="btn-desc" style="font-size:.5rem;margin-top:.2rem;">Peruana · Árabe · más</div>
+      <div class="btn ethnic" id="btn-playlist-l" onclick="sel(this,'l')" data-stream="" data-genre="Mi Playlist · Tu música" role="button" tabindex="0">
+        <div class="btn-dot"></div><span class="btn-icon" style="font-size:1.55rem;margin-bottom:.35rem;">🎵</span>
+        <div class="btn-name" style="font-size:.6rem;">Mi Playlist</div>
+        <div class="btn-desc" style="font-size:.5rem;margin-top:.2rem;">Tu música · Personal</div>
       </div>
       <div class="btn drive" onclick="sel(this,'l')" data-stream="https://stream.stumusicpro.cl/drive" data-genre="Drive · 95–125 BPM" role="button" tabindex="0">
         <div class="btn-dot"></div><span class="btn-icon" style="font-size:1.55rem;margin-bottom:.35rem;">🚗</span>
@@ -456,10 +456,15 @@ audio{display:none;}
 var urlParams=new URLSearchParams(window.location.search);
 var cliente=urlParams.get('cliente')||'sono-customers';
 var multiStream='https://stream.stumusicpro.cl/'+cliente;
+var playlistStream='https://stream.stumusicpro.cl/'+cliente+'-playlist';
 var btnMP=document.getElementById('btn-multi-p');
 var btnML=document.getElementById('btn-multi-l');
 if(btnMP) btnMP.dataset.stream=multiStream;
 if(btnML) btnML.dataset.stream=multiStream;
+var btnPP=document.getElementById('btn-playlist-p');
+var btnPL=document.getElementById('btn-playlist-l');
+if(btnPP) btnPP.dataset.stream=multiStream;
+if(btnPL) btnPL.dataset.stream=multiStream;
 
 
 var videoFiles=[];
@@ -653,6 +658,21 @@ function fetchTrack(mode){
 
 function sel(el,mode){
   if(el.classList.contains('locked')) return;
+  // Toggle Play/Stop - si ya está activo, detener
+  if(el.classList.contains('active') && playing && !el.classList.contains('multi')){
+    player.pause();
+    setP(false,mode);
+    el.classList.remove('active');
+    current=null;
+    var ml=document.getElementById('master-'+mode);
+    if(ml) ml.classList.remove('live');
+    document.getElementById('tname-'+mode).textContent='— Elige el ambiente —';
+    document.getElementById('tgenre-'+mode).textContent='Powered by TAW Radio';
+    if(progInterval) clearInterval(progInterval);
+    progInterval=null;
+    var p=document.getElementById('prog-'+mode);if(p) p.style.width='0%';
+    return;
+  }
   document.querySelectorAll('.btn').forEach(function(b){b.classList.remove('active');});
   el.classList.add('active');current=el;currentMode=mode;
   var ml=document.getElementById('master-'+mode);
