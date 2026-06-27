@@ -477,7 +477,7 @@ function openVideo(cliente){
   if(!videoFiles.length) return;
   // Guardar canal anterior
   previousChannel = current;
-  // Pausar audio MP3
+  // Pausar audio MP3 principal
   player.pause();
   setP(false, currentMode);
   // Activar controles multimedia
@@ -490,7 +490,9 @@ function openVideo(cliente){
     var img=document.getElementById('img-p');
     if(img) img.style.display='none';
     if(art) art.style.background='#000';
+    // Video con audio propio
     vp.src=videoFiles[0];
+    vp.muted=false;
     vp.play();
     vw.style.display='block';
   } else {
@@ -501,6 +503,7 @@ function openVideo(cliente){
     if(img) img.style.display='none';
     if(art) art.style.background='#000';
     vp.src=videoFiles[0];
+    vp.muted=false;
     vp.play();
     vw.style.display='block';
   }
@@ -515,38 +518,25 @@ function toggleVideo(){
 }
 
 function closeVideo(){
-  // Crear nuevos elementos video para forzar detención total
   var vwP=document.getElementById('video-wrap-p');
   var vwL=document.getElementById('video-wrap-l');
 
+  // Silenciar y detener video
   var vp=document.getElementById('videoPlayer');
   if(vp){
+    vp.muted=true;
     vp.pause();
+    vp.currentTime=0;
     vp.src='';
-    vp.removeAttribute('src');
     vp.load();
-    // Reemplazar el elemento completamente
-    var newVp=vp.cloneNode(false);
-    vp.parentNode.replaceChild(newVp,vp);
-    newVp.id='videoPlayer';
-    newVp.loop=true;
-    newVp.setAttribute('playsinline','');
-    newVp.style.cursor='pointer';
-    newVp.onclick=function(){toggleVideo();};
   }
   var vpL=document.getElementById('videoPlayerL');
   if(vpL){
+    vpL.muted=true;
     vpL.pause();
+    vpL.currentTime=0;
     vpL.src='';
-    vpL.removeAttribute('src');
     vpL.load();
-    var newVpL=vpL.cloneNode(false);
-    vpL.parentNode.replaceChild(newVpL,vpL);
-    newVpL.id='videoPlayerL';
-    newVpL.loop=true;
-    newVpL.setAttribute('playsinline','');
-    newVpL.style.cursor='pointer';
-    newVpL.onclick=function(){toggleVideo();};
   }
 
   if(vwP) vwP.style.display='none';
@@ -558,14 +548,19 @@ function closeVideo(){
   videoPlaying=false;
   activateMultimediaControls(false);
 
-  // Reactivar Mi Playlist si estaba activo antes
-  if(previousChannel && previousChannel.dataset.stream){
-    current=previousChannel;
-    player.src=previousChannel.dataset.stream;
-    player.play().then(function(){
-      setP(true,currentMode);
-      fetchTrack(currentMode);
-    }).catch(function(){setP(true,currentMode);});
+  // Volver a Mi Playlist o canal anterior
+  var targetChannel = previousChannel || current;
+  if(targetChannel && targetChannel.dataset.stream){
+    current=targetChannel;
+    setTimeout(function(){
+      if(vp) vp.muted=false;
+      if(vpL) vpL.muted=false;
+      player.src=targetChannel.dataset.stream;
+      player.play().then(function(){
+        setP(true,currentMode);
+        fetchTrack(currentMode);
+      }).catch(function(){setP(true,currentMode);});
+    },500);
   }
 }
 
