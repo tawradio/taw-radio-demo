@@ -515,12 +515,13 @@ function toggleVideo(){
 }
 
 function closeVideo(){
+  // Detener video completamente
   var vp=document.getElementById('videoPlayer');
   var vpL=document.getElementById('videoPlayerL');
   var vwP=document.getElementById('video-wrap-p');
   var vwL=document.getElementById('video-wrap-l');
-  if(vp){vp.pause();vp.src='';}
-  if(vpL){vpL.pause();vpL.src='';}
+  if(vp){vp.pause();vp.src='';vp.load();}
+  if(vpL){vpL.pause();vpL.src='';vpL.load();}
   if(vwP) vwP.style.display='none';
   if(vwL) vwL.style.display='none';
   var artP=document.getElementById('art-p');
@@ -529,18 +530,12 @@ function closeVideo(){
   if(artL) artL.style.background='';
   videoPlaying=false;
   activateMultimediaControls(false);
-  // Volver al canal anterior si existe
-  if(previousChannel){
-    player.src=previousChannel.dataset.stream;
-    player.play().then(function(){
-      setP(true,currentMode);
-    }).catch(function(){
-      setP(true,currentMode);
-    });
-  } else if(current){
+  // Volver al canal Multimedia con audio MP3
+  if(current && current.dataset.stream){
     player.src=current.dataset.stream;
     player.play().then(function(){
       setP(true,currentMode);
+      fetchTrack(currentMode);
     }).catch(function(){
       setP(true,currentMode);
     });
