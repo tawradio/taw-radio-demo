@@ -208,40 +208,46 @@ body::before{content:'';position:fixed;top:-10%;left:50%;transform:translateX(-5
 }
 audio{display:none;}
 
-
-#video-wrap-p, #video-wrap-l{
-  position:absolute !important;
-  top:0 !important;left:0 !important;right:0 !important;bottom:0 !important;
-  background:#000 !important;
-  border-radius:16px !important;
-  overflow:hidden !important;
+/* ── MULTIMEDIA OVERLAY ── */
+#sp-video-overlay{
   display:none;
-  z-index:5;
+  position:fixed;
+  inset:0;
+  background:#000;
+  z-index:9999;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
 }
-#videoPlayer, #videoPlayerL{
-  position:absolute !important;
-  top:0 !important;left:0 !important;
-  width:100% !important;
-  height:100% !important;
-  object-fit:fill !important;
-  background:#000 !important;
-  border:none !important;
-  outline:none !important;
+#sp-video-overlay.active{display:flex;}
+#sp-video-overlay video{
+  width:100%;
+  height:100%;
+  object-fit:contain;
 }
-.vid-close-btn{
+#sp-video-close{
   position:absolute;
-  top:8px;right:8px;
-  width:30px;height:30px;
+  top:16px;
+  right:16px;
+  width:44px;
+  height:44px;
   border-radius:50%;
-  background:rgba(0,0,0,.75);
-  border:1.5px solid rgba(255,255,255,.5);
+  background:rgba(0,0,0,.8);
+  border:2px solid rgba(255,255,255,.6);
   color:#fff;
-  font-size:.8rem;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;z-index:10;
-  opacity:1;
-  box-shadow:0 2px 8px rgba(0,0,0,.5);
+  font-size:1.2rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  z-index:10000;
 }
+
+
+
+
+
+
 
 
 /* ── VIDEO INTEGRADO ── */
@@ -302,10 +308,6 @@ audio{display:none;}
     <div class="artwork" style="width:100%;aspect-ratio:1/1;max-height:150px;margin-bottom:.4rem;" id="art-p">
       <div class="artwork-inner" id="art-inner-p"><img src="https://tawradio.github.io/sonoplayer-drive/sonoplayer-logo.png" style="width:60%;height:auto;opacity:.1;position:relative;" alt=""/></div>
       <img id="img-p" src="" alt=""/>
-      <div id="video-wrap-p">
-        <video id="videoPlayer" loop playsinline onclick="toggleVideo()" style="cursor:pointer;"></video>
-        <div class="vid-close-btn" onclick="closeVideo()">✕</div>
-      </div>
     </div>
     <div class="vis" id="vis-p" style="height:14px;margin-bottom:.4rem;">
       <div class="vb"></div><div class="vb"></div><div class="vb"></div>
@@ -348,6 +350,11 @@ audio{display:none;}
         <div class="btn-name" style="font-size:.56rem;">Drive</div>
         <div class="btn-desc" style="font-size:.46rem;margin-top:.15rem;">TAW Radio · En ruta</div>
       </div>
+      <div class="btn ethnic" id="btn-playlist-p" onclick="sel(this,'p')" data-stream="" data-genre="Mi Playlist · Tu música" role="button" tabindex="0">
+        <div class="btn-dot"></div><span class="btn-icon" style="font-size:1.35rem;margin-bottom:.3rem;">🎵</span>
+        <div class="btn-name" style="font-size:.56rem;">Mi Playlist</div>
+        <div class="btn-desc" style="font-size:.46rem;margin-top:.15rem;">Tu música · Personal</div>
+      </div>
       <div class="btn multi" id="btn-multi-p" onclick="sel(this,'p')" data-stream="" data-genre="Multimedia · Audio · Video" role="button" tabindex="0">
         <div class="btn-dot"></div><span class="btn-icon" style="font-size:1.35rem;margin-bottom:.3rem;">🎬</span>
         <div class="btn-name" style="font-size:.56rem;">Multimedia</div>
@@ -379,10 +386,6 @@ audio{display:none;}
       <div class="artwork" id="art-l" style="flex:1;min-height:0;aspect-ratio:unset;">
         <div class="artwork-inner" id="art-inner-l"><img src="https://tawradio.github.io/sonoplayer-drive/sonoplayer-logo.png" style="width:70%;height:auto;opacity:.1;position:relative;" alt=""/></div>
         <img id="img-l" src="" alt=""/>
-        <div id="video-wrap-l">
-          <video id="videoPlayerL" loop playsinline onclick="toggleVideo()" style="cursor:pointer;"></video>
-          <div class="vid-close-btn" onclick="closeVideo()">✕</div>
-        </div>
         <div style="position:absolute;bottom:10px;left:0;right:0;z-index:3;">
           <div class="vis" id="vis-l" style="height:22px;">
             <div class="vb"></div><div class="vb"></div><div class="vb"></div>
@@ -445,6 +448,13 @@ audio{display:none;}
 
 
 
+
+<!-- MULTIMEDIA VIDEO OVERLAY -->
+<div id="sp-video-overlay">
+  <video id="sp-video" loop playsinline controls></video>
+  <div id="sp-video-close" onclick="closeMultimedia()">✕</div>
+</div>
+
 <audio id="player" preload="none"></audio>
 <script>
 // Leer cliente de URL
@@ -465,10 +475,6 @@ if(btnPL) btnPL.dataset.stream=playlistStream;
 var videoFiles=[];
 var currentVideo=0;
 var videoPlaying=false;
-
-function loadVideoFiles(cliente){
-  videoFiles=['https://media.stumusicpro.cl/multimedia/'+cliente+'/Sonoplayer%20V1.mp4'];
-}
 
 var previousChannel = null;
 
@@ -492,7 +498,7 @@ function openVideo(cliente){
     if(art) art.style.background='#000';
     // Video con audio propio
     vp.src=videoFiles[0];
-    vp.muted=false;
+    vp.muted=true;
     vp.play();
     vw.style.display='block';
   } else {
@@ -503,271 +509,63 @@ function openVideo(cliente){
     if(img) img.style.display='none';
     if(art) art.style.background='#000';
     vp.src=videoFiles[0];
-    vp.muted=false;
+    vp.muted=true;
     vp.play();
     vw.style.display='block';
   }
+  // Audio via player principal
+  player.src='https://stream.stumusicpro.cl/'+cliente;
+  player.play().then(function(){setP(true,currentMode);}).catch(function(){});
   videoPlaying=true;
 }
 
-function toggleVideo(){
-  var isPortrait=window.innerWidth<=540&&window.innerHeight>window.innerWidth;
-  var vp=document.getElementById(isPortrait?'videoPlayer':'videoPlayerL');
-  if(videoPlaying){vp.pause();videoPlaying=false;}
-  else{vp.play();videoPlaying=true;}
+
+var previousChannel = null;
+
+function openMultimedia(cliente){
+  var url = 'https://media.stumusicpro.cl/multimedia/'+cliente+'/Sonoplayer%20V1.mp4';
+  previousChannel = current;
+  // Pausar audio MP3
+  player.pause();
+  setP(false, currentMode);
+  // Activar controles multimedia
+  activateMultimediaControls(true);
+  // Mostrar overlay con video
+  var overlay = document.getElementById('sp-video-overlay');
+  var vid = document.getElementById('sp-video');
+  vid.src = url;
+  vid.play();
+  overlay.classList.add('active');
+  videoPlaying = true;
 }
 
-function closeVideo(){
-  var vwP=document.getElementById('video-wrap-p');
-  var vwL=document.getElementById('video-wrap-l');
-
-  // Silenciar y detener video
-  var vp=document.getElementById('videoPlayer');
-  if(vp){
-    vp.muted=true;
-    vp.pause();
-    vp.currentTime=0;
-    vp.src='';
-    vp.load();
-  }
-  var vpL=document.getElementById('videoPlayerL');
-  if(vpL){
-    vpL.muted=true;
-    vpL.pause();
-    vpL.currentTime=0;
-    vpL.src='';
-    vpL.load();
-  }
-
-  if(vwP) vwP.style.display='none';
-  if(vwL) vwL.style.display='none';
-  var artP=document.getElementById('art-p');
-  var artL=document.getElementById('art-l');
-  if(artP) artP.style.background='';
-  if(artL) artL.style.background='';
-  videoPlaying=false;
+function closeMultimedia(){
+  var overlay = document.getElementById('sp-video-overlay');
+  var vid = document.getElementById('sp-video');
+  // Detener video completamente
+  vid.pause();
+  vid.src = '';
+  vid.load();
+  overlay.classList.remove('active');
+  videoPlaying = false;
   activateMultimediaControls(false);
-
-  // Volver a Mi Playlist o canal anterior
-  var targetChannel = previousChannel || current;
-  if(targetChannel && targetChannel.dataset.stream){
-    current=targetChannel;
-    setTimeout(function(){
-      if(vp) vp.muted=false;
-      if(vpL) vpL.muted=false;
-      player.src=targetChannel.dataset.stream;
-      player.play().then(function(){
-        setP(true,currentMode);
-        fetchTrack(currentMode);
-      }).catch(function(){setP(true,currentMode);});
-    },500);
+  // Volver al canal anterior
+  var target = previousChannel || current;
+  if(target && target.dataset.stream){
+    current = target;
+    document.querySelectorAll('.btn').forEach(function(b){b.classList.remove('active');});
+    target.classList.add('active');
+    player.src = target.dataset.stream;
+    player.play().then(function(){
+      setP(true, currentMode);
+      fetchTrack(currentMode);
+    }).catch(function(){setP(true, currentMode);});
   }
 }
 
-document.addEventListener('keydown',function(e){
-  if(e.key==='Escape') closeVideo();
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') closeMultimedia();
 });
-
-var player=document.getElementById('player');
-var playing=false;var current=null;var currentMode='l';
-var tid=null;var progInterval=null;var elapsed=0;
-
-function updateClock(){
-  var now=new Date();
-  document.getElementById('clock').textContent=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-}
-updateClock();setInterval(updateClock,10000);
-
-window.addEventListener('load',function(){
-  setTimeout(function(){document.getElementById('loader').classList.add('out');},1400);
-  checkLayout();
-});
-window.addEventListener('resize',checkLayout);
-window.addEventListener('orientationchange',function(){setTimeout(checkLayout,300);});
-
-function checkLayout(){
-  var isPortrait=window.innerWidth<=540&&window.innerHeight>window.innerWidth;
-  currentMode=isPortrait?'p':'l';
-  document.querySelectorAll('.portrait-only').forEach(function(el){el.style.display=isPortrait?'block':'none';});
-  document.querySelectorAll('.landscape-only').forEach(function(el){
-    el.style.display=isPortrait?'none':(el.classList.contains('grid-l')?'grid':'block');
-  });
-}
-
-var trackDuration=150;
-var trackMeta={};
-function startProgress(mode){
-  startProgressFrom(mode, 0);
-}
-function startProgressFrom(mode, fromElapsed){
-  if(progInterval) clearInterval(progInterval);
-  elapsed = fromElapsed || 0;
-  progInterval=setInterval(function(){
-    elapsed++;
-    var pct=Math.min((elapsed/trackDuration)*100,100);
-    var p=document.getElementById('prog-'+mode);if(p) p.style.width=pct+'%';
-    var t1=document.getElementById('pt1-'+mode);if(t1) t1.textContent=fmtTime(elapsed);
-    var t2=document.getElementById('pt2-'+mode);if(t2) t2.textContent=fmtTime(trackDuration);
-    if(elapsed>=trackDuration) elapsed=0;
-  },1000);
-}
-function fmtTime(s){var m=Math.floor(s/60);return m+':'+String(s%60).padStart(2,'0');}
-
-var lastTitle={};
-
-function fetchTrack(mode){
-  if(!current) return;
-  var mount=current.dataset.stream.split('/').pop();
-  var img=document.getElementById('img-'+mode);
-  // Actualizar caratula
-  var coverUrl='https://stream.stumusicpro.cl/covers/'+mount+'.jpg?t='+Date.now();
-  if(img){
-    var newImg=new Image();
-    newImg.onload=function(){img.src=coverUrl;img.style.display='block';};
-    newImg.src=coverUrl;
-    var inner=document.querySelector('#art-'+mode+' .artwork-inner');
-    if(inner) inner.style.display='none';
-  }
-  // Leer meta.json para titulo, duracion y started
-  fetch('https://stream.stumusicpro.cl/covers/meta.json?t='+Date.now())
-    .then(function(r){return r.json();})
-    .then(function(d){
-      if(!d||!d[mount]) return;
-      var info=d[mount];
-      var newTitle=info.title||'Sonando ahora';
-      var tn=document.getElementById('tname-'+mode);
-      // Si el titulo cambio actualizar duracion y reiniciar contador
-      if(newTitle!==lastTitle[mount]){
-        lastTitle[mount]=newTitle;
-        if(tn) tn.textContent=newTitle;
-        if(info.duration&&info.duration>0) trackDuration=info.duration;
-        var fromElapsed=0;
-        if(info.started){
-          var nowSec=Math.floor(Date.now()/1000);
-          var diff=nowSec-info.started;
-          if(diff>0&&trackDuration>0) fromElapsed=diff%trackDuration;
-        }
-        if(progInterval) clearInterval(progInterval);
-        progInterval=null;
-        elapsed=fromElapsed;
-        startProgressFrom(mode,fromElapsed);
-      }
-    }).catch(function(){});
-}
-
-function sel(el,mode){
-  if(el.classList.contains('locked')) return;
-  // Toggle Play/Stop - si ya está activo, detener
-  if(el.classList.contains('active') && playing && !el.classList.contains('multi')){
-    player.pause();
-    setP(false,mode);
-    el.classList.remove('active');
-    current=null;
-    var ml=document.getElementById('master-'+mode);
-    if(ml) ml.classList.remove('live');
-    document.getElementById('tname-'+mode).textContent='— Elige el ambiente —';
-    document.getElementById('tgenre-'+mode).textContent='Powered by TAW Radio';
-    if(progInterval) clearInterval(progInterval);
-    progInterval=null;
-    var p=document.getElementById('prog-'+mode);if(p) p.style.width='0%';
-    return;
-  }
-  document.querySelectorAll('.btn').forEach(function(b){b.classList.remove('active');});
-  el.classList.add('active');current=el;currentMode=mode;
-  var ml=document.getElementById('master-'+mode);
-  document.getElementById('tname-'+mode).textContent='Cargando...';
-  document.getElementById('tgenre-'+mode).textContent=el.dataset.genre;
-  if(ml) ml.classList.add('live');
-  player.src=el.dataset.stream;
-  player.play().then(function(){setP(true,mode);}).catch(function(){setP(true,mode);});
-  var mount=el.dataset.stream.split('/').pop();
-  // Leer meta.json primero para obtener duración real
-  fetch('https://stream.stumusicpro.cl/covers/meta.json?t='+Date.now())
-    .then(function(r){return r.json();})
-    .then(function(d){
-      if(d&&d[mount]){
-        if(d[mount].duration>0) trackDuration=d[mount].duration;
-        if(d[mount].title) document.getElementById('tname-'+mode).textContent=d[mount].title;
-        // Calcular elapsed desde cuando empezó el track
-        if(d[mount].started){
-          var nowSec=Math.floor(Date.now()/1000);
-          var trackElapsed=nowSec - d[mount].started;
-          // Puede que hayan pasado varios tracks, calcular posición dentro del track actual
-          if(trackElapsed>0 && trackDuration>0){
-            elapsed = trackElapsed % trackDuration;
-          }
-        }
-      }
-      startProgressFrom(mode, elapsed);
-    }).catch(function(){startProgressFrom(mode, 0);});
-  fetchTrack(mode);
-  if(tid) clearInterval(tid);
-  tid=setInterval(function(){fetchTrack(mode);},8000);
-  // Si es Multimedia abrir video
-  if(el.classList.contains('multi')){
-    setTimeout(function(){openVideo(cliente);},500);
-  }
-}
-
-function togglePlay(mode){
-  if(!current){var f=document.querySelector('.btn:not(.locked)');if(f) sel(f,mode);return;}
-  if(playing){player.pause();setP(false,currentMode);}
-  else{player.play().catch(function(){});setP(true,currentMode);}
-}
-
-function setP(s,mode){
-  playing=s;
-  var pb=document.getElementById('play-'+mode);if(pb) pb.textContent=s?'⏸':'▶';
-  var v=document.getElementById('vis-'+mode);if(v) v.classList.toggle('on',s);
-  if(!s&&progInterval){clearInterval(progInterval);progInterval=null;}
-  else if(s&&!progInterval) resumeProgress(mode);
-}
-
-function resumeProgress(mode){
-  if(progInterval) clearInterval(progInterval);
-  progInterval=setInterval(function(){
-    elapsed++;
-    var pct=Math.min((elapsed/trackDuration)*100,100);
-    var p=document.getElementById('prog-'+mode);
-    if(p) p.style.width=pct+'%';
-    var t1=document.getElementById('pt1-'+mode);
-    if(t1) t1.textContent=fmtTime(elapsed);
-    var t2=document.getElementById('pt2-'+mode);
-    if(t2) t2.textContent=fmtTime(trackDuration);
-    if(elapsed>=trackDuration) elapsed=0;
-  },1000);
-}
-
-
-var channelList=[];
-var channelIndex=0;
-
-function buildChannelList(){
-  channelList=[];
-  document.querySelectorAll('.btn:not(.locked)').forEach(function(b){
-    if(b.dataset.stream) channelList.push(b);
-  });
-}
-
-function prevTrack(){
-  buildChannelList();
-  if(!channelList.length) return;
-  if(current){
-    var idx=channelList.indexOf(current);
-    channelIndex=(idx-1+channelList.length)%channelList.length;
-  } else { channelIndex=channelList.length-1; }
-  sel(channelList[channelIndex],currentMode);
-}
-
-function nextTrack(){
-  buildChannelList();
-  if(!channelList.length) return;
-  if(current){
-    var idx=channelList.indexOf(current);
-    channelIndex=(idx+1)%channelList.length;
-  } else { channelIndex=0; }
-  sel(channelList[channelIndex],currentMode);
-}
 
 
 function activateMultimediaControls(active){
