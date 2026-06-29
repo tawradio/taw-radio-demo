@@ -457,6 +457,29 @@ audio{display:none;}
 
 <audio id="player" preload="none"></audio>
 <script>
+// Loader
+window.addEventListener('load',function(){
+  setTimeout(function(){document.getElementById('loader').classList.add('out');},1400);
+  checkLayout();
+});
+window.addEventListener('resize',checkLayout);
+window.addEventListener('orientationchange',function(){setTimeout(checkLayout,300);});
+
+function checkLayout(){
+  var isPortrait=window.innerWidth<=540&&window.innerHeight>window.innerWidth;
+  currentMode=isPortrait?'p':'l';
+  document.querySelectorAll('.portrait-only').forEach(function(el){el.style.display=isPortrait?'block':'none';});
+  document.querySelectorAll('.landscape-only').forEach(function(el){
+    el.style.display=isPortrait?'none':(el.classList.contains('grid-l')?'grid':'block');
+  });
+}
+
+function updateClock(){
+  var now=new Date();
+  document.getElementById('clock').textContent=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+}
+updateClock();setInterval(updateClock,10000);
+
 // Leer cliente de URL
 var urlParams=new URLSearchParams(window.location.search);
 var cliente=urlParams.get('cliente')||'sono-customers';
