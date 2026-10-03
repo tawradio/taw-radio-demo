@@ -836,10 +836,10 @@ function plRenderList(){
     div.className = 'pl-track' + (i===plCurrentIdx?' playing':'');
     div.innerHTML =
       '<div class="pl-track-num">'+(i+1)+'</div>'+
-      '<div class="pl-track-cover"><img src="https://stream.stumusicpro.cl/covers/'+plCanal+'-playlist.jpg?t='+Date.now()+'" onerror="this.style.display='none'"></div>'+
+      '<div class="pl-track-cover" style="background:rgba(0,255,136,.1);display:flex;align-items:center;justify-content:center;font-size:.8rem;">🎵</div>'+
       '<div class="pl-track-info"><div class="pl-track-name">'+name+'</div><div class="pl-track-size">'+size+'</div></div>'+
       '<div class="pl-track-play" onclick="plPlay('+i+')">▶</div>'+
-      '<div class="pl-track-del" onclick="plDelete(''+t.name+'','+i+')">🗑</div>';
+      '<div class="pl-track-del" onclick="plDelete(this.dataset.name,' + i + ')" data-name="' + t.name + '">🗑</div>';
     list.appendChild(div);
   });
 }
