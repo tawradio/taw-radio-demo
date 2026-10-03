@@ -759,6 +759,117 @@ function setP(s,mode){
   if(!s&&progInterval){clearInterval(progInterval);progInterval=null;}
 }
 
+
+// ── MI PLAYLIST ──
+var PL_API = 'https://sonoplayer.stumusicpro.cl';
+var plToken = null;
+var plTracks = [];
+var plCurrentIdx = -1;
+var plCanal = null;
+var plAudio = new Audio();
+plAudio.preload = 'none';
+
+function openPl(){
+  document.getElementById('pl-user').value = '';
+  document.getElementById('pl-pass').value = '';
+  document.getElementById('pl-err').textContent = '';
+  document.getElementById('pl-login').style.display = 'flex';
+  document.getElementById('pl-panel').classList.remove('active');
+  document.getElementById('pl-overlay').classList.add('active');
+  player.pause();
+  setP(false, currentMode);
+}
+
+function closePl(){
+  document.getElementById('pl-overlay').classList.remove('active');
+  plAudio.pause();
+  document.querySelectorAll('.btn').forEach(function(b){b.classList.remove('active');});
+  current = null;
+}
+
+function plLogin(){
+  var user = document.getElementById('pl-user').value.trim();
+  var pass = document.getElementById('pl-pass').value;
+  if(!user||!pass){document.getElementById('pl-err').textContent='Ingresa usuario y contraseña';return;}
+  document.getElementById('pl-err').textContent = 'Ingresando...';
+  var fd = new FormData();
+  fd.append('username', user);
+  fd.append('password', pass);
+  fetch(PL_API+'/login', {method:'POST', body:fd})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.token){
+        plToken = d.token;
+        plCanal = d.canal;
+        document.getElementById('pl-login').style.display = 'none';
+        document.getElementById('pl-panel').classList.add('active');
+        plLoadTracks();
+      } else {
+        document.getElementById('pl-err').textContent = d.detail || 'Error al ingresar';
+      }
+    }).catch(function(){
+      document.getElementById('pl-err').textContent = 'Error de conexión';
+    });
+}
+
+function plLoadTracks(){
+  fetch(PL_API+'/tracks', {headers:{'Authorization':'Bearer '+plToken}})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      plTracks = d.tracks || [];
+      document.getElementById('pl-count').textContent = plTracks.length+'/50 tracks';
+      plRenderList();
+    }).catch(function(){});
+}
+
+function plRenderList(){
+  var list = document.getElementById('pl-list');
+  if(!plTracks.length){
+    list.innerHTML = '<div class="pl-empty"><span style="font-size:2rem;">🎵</span><span>Sin tracks aún</span><span style="font-size:.75rem;">Sube tus MP3 desde el portal</span></div>';
+    return;
+  }
+  list.innerHTML = '';
+  plTracks.forEach(function(t, i){
+    var name = t.name.replace('.mp3','').replace(/_/g,' ');
+    var size = t.size < 1048576 ? Math.round(t.size/1024)+'KB' : (t.size/1048576).toFixed(1)+'MB';
+    var div = document.createElement('div');
+    div.className = 'pl-track' + (i===plCurrentIdx?' playing':'');
+    div.innerHTML =
+      '<div class="pl-track-num">'+(i+1)+'</div>'+
+      '<div class="pl-track-cover"><img src="https://stream.stumusicpro.cl/covers/'+plCanal+'-playlist.jpg?t='+Date.now()+'" onerror="this.style.display='none'"></div>'+
+      '<div class="pl-track-info"><div class="pl-track-name">'+name+'</div><div class="pl-track-size">'+size+'</div></div>'+
+      '<div class="pl-track-play" onclick="plPlay('+i+')">▶</div>'+
+      '<div class="pl-track-del" onclick="plDelete(''+t.name+'','+i+')">🗑</div>';
+    list.appendChild(div);
+  });
+}
+
+function plPlay(idx){
+  plCurrentIdx = idx;
+  var t = plTracks[idx];
+  var streamUrl = 'https://stream.stumusicpro.cl/'+plCanal+'-playlist';
+  plAudio.src = streamUrl;
+  plAudio.play();
+  var img = document.getElementById('pl-art-img');
+  var coverUrl = 'https://stream.stumusicpro.cl/covers/'+plCanal+'-playlist.jpg?t='+Date.now();
+  img.src = coverUrl;
+  img.style.display = 'block';
+  document.getElementById('pl-now').textContent = t.name.replace('.mp3','').replace(/_/g,' ');
+  plRenderList();
+}
+
+function plDelete(filename, idx){
+  if(!confirm('¿Eliminar "'+filename+'"?')) return;
+  fetch(PL_API+'/track/'+encodeURIComponent(filename), {
+    method:'DELETE',
+    headers:{'Authorization':'Bearer '+plToken}
+  }).then(function(r){return r.json();})
+    .then(function(){
+      if(plCurrentIdx===idx){plAudio.pause();plCurrentIdx=-1;}
+      plLoadTracks();
+    }).catch(function(){});
+}
+
 // Multimedia
 function openMultimedia(){
   var overlay=document.getElementById('sp-video-overlay');
