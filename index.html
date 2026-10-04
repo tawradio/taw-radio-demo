@@ -691,9 +691,34 @@ function fetchTrack(mode){
 
 // Seleccionar canal — toggle play/stop
 function sel(el,mode){
-  // Si es Mi Playlist abrir overlay
+  // Si es Mi Playlist - toggle play/stop + abrir overlay login si no hay token
   if(el.id==='btn-playlist-p'||el.id==='btn-playlist-l'){
-    openPl();
+    if(el.classList.contains('active') && plAudio && !plAudio.paused){
+      plAudio.pause();
+      el.classList.remove('active');
+      var ml=document.getElementById('master-'+mode);
+      if(ml) ml.classList.remove('live');
+      var vis=document.getElementById('vis-'+mode);
+      if(vis) vis.classList.remove('on');
+      if(progInterval){clearInterval(progInterval);progInterval=null;}
+      return;
+    }
+    if(!plToken){
+      openPl();
+    } else {
+      // Ya tiene token - reproducir directo
+      document.querySelectorAll('.btn').forEach(function(b){b.classList.remove('active');});
+      el.classList.add('active');
+      currentMode=mode;
+      player.pause();
+      if(plTracks.length>0){
+        plPlay(plCurrentIdx>=0?plCurrentIdx:0);
+      } else {
+        plLoadTracks();
+      }
+      // Activar controles multimedia para playlist
+      activatePlaylistControls(true);
+    }
     return;
   }
   // Si es Multimedia abrir video
@@ -782,9 +807,6 @@ function openPl(){
 
 function closePl(){
   document.getElementById('pl-overlay').classList.remove('active');
-  plAudio.pause();
-  document.querySelectorAll('.btn').forEach(function(b){b.classList.remove('active');});
-  current = null;
 }
 
 function plLogin(){
@@ -801,9 +823,23 @@ function plLogin(){
       if(d.token){
         plToken = d.token;
         plCanal = d.canal;
-        document.getElementById('pl-login').style.display = 'none';
-        document.getElementById('pl-panel').classList.add('active');
-        plLoadTracks();
+        document.getElementById('pl-overlay').classList.remove('active');
+        // Activar botón Mi Playlist
+        var btnP=document.getElementById('btn-playlist-p');
+        var btnL=document.getElementById('btn-playlist-l');
+        document.querySelectorAll('.btn').forEach(function(b){b.classList.remove('active');});
+        if(currentMode==='p'&&btnP) btnP.classList.add('active');
+        if(currentMode==='l'&&btnL) btnL.classList.add('active');
+        // Cargar y reproducir
+        fetch(PL_API+'/tracks',{headers:{'Authorization':'Bearer '+plToken}})
+          .then(function(r){return r.json();})
+          .then(function(d){
+            plTracks=d.tracks||[];
+            if(plTracks.length>0){
+              plPlay(0);
+              activatePlaylistControls(true);
+            }
+          }).catch(function(){});
       } else {
         document.getElementById('pl-err').textContent = d.detail || 'Error al ingresar';
       }
