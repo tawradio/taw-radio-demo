@@ -847,9 +847,18 @@ function plRenderList(){
 function plPlay(idx){
   plCurrentIdx = idx;
   var t = plTracks[idx];
-  var streamUrl = 'https://stream.stumusicpro.cl/'+plCanal+'-playlist';
-  plAudio.src = streamUrl;
+  // Reproducir directamente desde Apache
+  var mp3Url = 'https://playlist.stumusicpro.cl/music/'+plCanal+'/'+encodeURIComponent(t.name);
+  plAudio.src = mp3Url;
   plAudio.play();
+  // Al terminar el track, pasar al siguiente
+  plAudio.onended = function(){
+    if(plCurrentIdx < plTracks.length-1){
+      plPlay(plCurrentIdx+1);
+    } else {
+      plPlay(0); // volver al primero
+    }
+  };
   var img = document.getElementById('pl-art-img');
   var coverUrl = 'https://stream.stumusicpro.cl/covers/'+plCanal+'-playlist.jpg?t='+Date.now();
   img.src = coverUrl;
