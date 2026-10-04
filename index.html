@@ -847,23 +847,56 @@ function plRenderList(){
 function plPlay(idx){
   plCurrentIdx = idx;
   var t = plTracks[idx];
-  // Reproducir directamente desde Apache
   var mp3Url = 'https://playlist.stumusicpro.cl/music/'+plCanal+'/'+encodeURIComponent(t.name);
   plAudio.src = mp3Url;
   plAudio.play();
-  // Al terminar el track, pasar al siguiente
+
+  // Actualizar barra de control maestra
+  var mode = currentMode;
+  var trackName = t.name.replace(/\.mp3$/i,'').replace(/_/g,' ');
+  var tn = document.getElementById('tname-'+mode);
+  if(tn) tn.textContent = trackName;
+  var tg = document.getElementById('tgenre-'+mode);
+  if(tg) tg.textContent = 'Mi Playlist · '+plCanal;
+  var ml = document.getElementById('master-'+mode);
+  if(ml) ml.classList.add('live');
+  var vis = document.getElementById('vis-'+mode);
+  if(vis) vis.classList.add('on');
+
+  // Progreso real del track
+  if(progInterval) clearInterval(progInterval);
+  elapsed = 0;
+  plAudio.onloadedmetadata = function(){
+    trackDuration = Math.floor(plAudio.duration) || 150;
+    var t2 = document.getElementById('pt2-'+mode);
+    if(t2) t2.textContent = fmtTime(trackDuration);
+  };
+  progInterval = setInterval(function(){
+    elapsed = Math.floor(plAudio.currentTime);
+    var pct = Math.min((elapsed/trackDuration)*100,100);
+    var p = document.getElementById('prog-'+mode);
+    if(p) p.style.width = pct+'%';
+    var t1 = document.getElementById('pt1-'+mode);
+    if(t1) t1.textContent = fmtTime(elapsed);
+    var t2 = document.getElementById('pt2-'+mode);
+    if(t2) t2.textContent = fmtTime(trackDuration);
+  },1000);
+
+  // Al terminar pasar al siguiente
   plAudio.onended = function(){
     if(plCurrentIdx < plTracks.length-1){
       plPlay(plCurrentIdx+1);
     } else {
-      plPlay(0); // volver al primero
+      plPlay(0);
     }
   };
+
+  // Carátula en overlay
   var img = document.getElementById('pl-art-img');
   var coverUrl = 'https://stream.stumusicpro.cl/covers/'+plCanal+'-playlist.jpg?t='+Date.now();
   img.src = coverUrl;
   img.style.display = 'block';
-  document.getElementById('pl-now').textContent = t.name.replace('.mp3','').replace(/_/g,' ');
+  document.getElementById('pl-now').textContent = trackName;
   plRenderList();
 }
 
