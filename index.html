@@ -732,6 +732,7 @@ function sel(el,mode){
   // Toggle stop si ya está activo
   if(el.classList.contains('active')&&playing){
     player.pause();
+    plAudio.pause();
     setP(false,mode);
     el.classList.remove('active');
     current=null;
@@ -747,6 +748,12 @@ function sel(el,mode){
   }
   document.querySelectorAll('.btn').forEach(function(b){b.classList.remove('active');});
   el.classList.add('active');current=el;currentMode=mode;
+  // Detener Mi Playlist si estaba sonando
+  if(plAudio && !plAudio.paused){
+    plAudio.pause();
+    plAudio.src='';
+    activatePlaylistControls(false);
+  }
   var ml=document.getElementById('master-'+mode);
   document.getElementById('tname-'+mode).textContent='Cargando...';
   document.getElementById('tgenre-'+mode).textContent=el.dataset.genre;
@@ -976,6 +983,59 @@ function closeMultimedia(){
 }
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape') closeMultimedia();});
+
+
+function activatePlaylistControls(active){
+  var playP=document.getElementById('play-p');
+  var playL=document.getElementById('play-l');
+  var prevP=document.getElementById('prev-p');
+  var prevL=document.getElementById('prev-l');
+  var nextP=document.getElementById('next-p');
+  var nextL=document.getElementById('next-l');
+  if(active){
+    if(playP){playP.style.cursor='pointer';playP.style.opacity='1';playP.textContent='⏸';
+      playP.onclick=function(){if(plAudio.paused){plAudio.play();playP.textContent='⏸';if(playL)playL.textContent='⏸';}else{plAudio.pause();playP.textContent='▶';if(playL)playL.textContent='▶';}};
+    }
+    if(playL){playL.style.cursor='pointer';playL.style.opacity='1';playL.textContent='⏸';
+      playL.onclick=function(){if(plAudio.paused){plAudio.play();playL.textContent='⏸';if(playP)playP.textContent='⏸';}else{plAudio.pause();playL.textContent='▶';if(playP)playP.textContent='▶';}};
+    }
+    if(prevP){prevP.classList.remove('off');prevP.onclick=function(){plPlay(plCurrentIdx>0?plCurrentIdx-1:plTracks.length-1);};}
+    if(prevL){prevL.classList.remove('off');prevL.onclick=function(){plPlay(plCurrentIdx>0?plCurrentIdx-1:plTracks.length-1);};}
+    if(nextP){nextP.classList.remove('off');nextP.onclick=function(){plPlay(plCurrentIdx<plTracks.length-1?plCurrentIdx+1:0);};}
+    if(nextL){nextL.classList.remove('off');nextL.onclick=function(){plPlay(plCurrentIdx<plTracks.length-1?plCurrentIdx+1:0);};}
+  } else {
+    if(playP){playP.style.cursor='default';playP.style.opacity='.6';playP.onclick=null;playP.textContent='▶';}
+    if(playL){playL.style.cursor='default';playL.style.opacity='.6';playL.onclick=null;playL.textContent='▶';}
+    if(prevP){prevP.classList.add('off');prevP.onclick=null;}
+    if(prevL){prevL.classList.add('off');prevL.onclick=null;}
+    if(nextP){nextP.classList.add('off');nextP.onclick=null;}
+    if(nextL){nextL.classList.add('off');nextL.onclick=null;}
+  }
+}
+
+function activateMultimediaControls(active){
+  var playP=document.getElementById('play-p');
+  var playL=document.getElementById('play-l');
+  var prevP=document.getElementById('prev-p');
+  var prevL=document.getElementById('prev-l');
+  var nextP=document.getElementById('next-p');
+  var nextL=document.getElementById('next-l');
+  if(active){
+    if(playP){playP.style.cursor='pointer';playP.style.opacity='1';playP.onclick=function(){toggleVideo();};}
+    if(playL){playL.style.cursor='pointer';playL.style.opacity='1';playL.onclick=function(){toggleVideo();};}
+    if(prevP){prevP.classList.remove('off');prevP.onclick=function(){closeMultimedia();};}
+    if(prevL){prevL.classList.remove('off');prevL.onclick=function(){closeMultimedia();};}
+    if(nextP){nextP.classList.remove('off');nextP.onclick=function(){closeMultimedia();};}
+    if(nextL){nextL.classList.remove('off');nextL.onclick=function(){closeMultimedia();};}
+  } else {
+    if(playP){playP.style.cursor='default';playP.style.opacity='.6';playP.onclick=null;playP.textContent='▶';}
+    if(playL){playL.style.cursor='default';playL.style.opacity='.6';playL.onclick=null;playL.textContent='▶';}
+    if(prevP){prevP.classList.add('off');prevP.onclick=null;}
+    if(prevL){prevL.classList.add('off');prevL.onclick=null;}
+    if(nextP){nextP.classList.add('off');nextP.onclick=null;}
+    if(nextL){nextL.classList.add('off');nextL.onclick=null;}
+  }
+}
 
 document.querySelectorAll('.btn').forEach(function(el){
   el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ') sel(el,currentMode);});
